@@ -1,0 +1,86 @@
+# Instalar la librería TextBlob si no está instalada
+!pip install textblob
+ 
+# Importar las librerías necesarias
+from textblob import TextBlob
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+ 
+#descargas de recursos
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('wordnet')
+ 
+#Inicializarlo lematizacion y stopwords
+lemmatizer = WordNetLemmatizer()
+stop_words = set(stopwords.words('spanish'))
+ 
+ 
+# Lista de reseñas de productos
+reseñas = [
+    "Este producto es malo",
+    "No vale la pena, es muy caro para lo que ofrece.",
+    "Satisfecho con la compra, buena calidad.",
+    "El peor servicio al cliente que he recibido.",
+    "Un artículo increíble, funciona de maravilla.",
+    "Muy mala experiencia, llegó dañado.",
+    "Lo recomiendo, muy buen producto.",
+    "Nunca volvería a comprar esto, pésima calidad."
+]
+ 
+ 
+#Diccionario de palabras clave y sus puntuaciones
+puntuaciones = {
+    'bueno':1,
+    'satisfecho':1,
+    'recomiendo':1,
+    'increíble':1,
+    'muy bueno':1,
+    'excelente':1,
+    'buena':1,
+    'muy buena':1,
+    'malo':-1,
+    'peor':-1,
+    'pésimo':-1,
+    'pésima':-1,
+    'muy malo':-1,
+    'muy pésimo':-1,
+    'no vale la pena':-1,
+    'caro':-1,
+    'muy caro':-1,
+    'muy barato':1,
+    'barato':1,
+    'dañado':-1,
+    'mala':-1
+}
+ 
+# Función para realizar análisis de sentimientos con TextBlob
+def analizar_sentimiento(texto):
+    #tokenizar y lematizar el texto
+    palabras = word_tokenize(texto.lower())
+    palabras_limpias = [lemmatizer.lemmatize(palabra) for palabra in palabras if palabra.isalnum() and palabra not in stop_words]
+   
+    #Analizar el sentimiento con el textblob
+    blob = TextBlob(' '.join(palabras_limpias))
+    polaridad = blob.sentiment.polarity  # Polaridad entre -1 (negativo) y 1 (positivo)
+   
+    #Ajustar la polaridad segun la palabra clave
+    score = polaridad
+    for palabra in palabras_limpias:
+        if palabra in puntuaciones:
+            score += puntuaciones[palabra]
+    #clasificacion del sentimiento
+    if score > 0.2:
+        return 'Positivo'
+    elif score < -0.2:
+        return 'Negativo'
+    else:
+        return 'Neutro'
+ 
+# Aplicar análisis de sentimientos a cada reseña
+for reseña in reseñas:
+    sentimiento = analizar_sentimiento(reseña)
+    print(f"Reseña: {reseña}")
+    print(f"Sentimiento: {sentimiento}\n")

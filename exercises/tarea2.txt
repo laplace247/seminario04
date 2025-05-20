@@ -1,0 +1,11 @@
+Ejercicio: Prediccion del numero de vistas de videos de German Garmendia
+Contexto: Eres un analista de datos que trabaja con el canal de Youtube de German. Quieres predecir del numero de vistas que podria tener un nuevo video en funcion de diversas cararteristicas, como la duracion del video, numero de "me gusta," el numero de comnetarios y el numero de suscriptores en ese momento.
+
+Datos requeridos:
+1. Duracion del video (en minutos): Duracion media de los medios en el canal.
+2. Numero de "me gusta": Promedio de "me gusta" por video.
+3. Numero de comentarios: Promedio de comentarios por video.
+4. Numero de suscriptores: Numero de suscriptores en el canal al momento del lanzamiento del video
+
+Prediccion:
+- Numero de vistas que podria tener un nuevo video en funcion de diversas caracteristicas

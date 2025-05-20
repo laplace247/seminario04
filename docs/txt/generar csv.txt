@@ -1,0 +1,30 @@
+[01/10 13:44] LEON MARIN, GERMAN WILIANS
+#GENERAR DATOS Y ARCHIVOS DE CSV
+import numpy as np
+import pandas as pd
+ 
+#configuracion
+np.random.seed(42)
+ 
+#generar ventas mensuales
+def generar_datos_ventas(nombre_empresa,productos,start,end):
+    meses = pd.date_range(start=start,end=end,freq='M')
+    datos_ventas = pd.DataFrame({
+      'Meses':meses,
+      **{producto:np.random.randint(1000,5000,size=len(meses)) for producto in productos}
+  })
+ 
+    #guardar el dataframe como csv
+    datos_ventas.to_csv(f'/content/{nombre_empresa}.csv', index=False)
+ 
+ #definir el nombre de las empresas
+empresas = {
+     'Heladería':['Chocolate','Fresa','Vainilla','Mango'],
+     'Restaurante':['Pasta','Pizza','Ensalada','Sushi'],
+     'Tienda_de_ropa':['Camisas','Pantalones','Vestidos','Blusas'],
+     'Librería':['Ficción','No Ficción','Historia','Ciencia']
+}
+ 
+#generar los datos y guardarlos como csv
+for nombre_empresa,productos in empresas.items():
+      generar_datos_ventas(nombre_empresa,productos,'2020-01-01','2024-09-30')

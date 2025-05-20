@@ -1,0 +1,202 @@
+
+/*
+
+Una empresa tiene dos turnos(mañana y noche) en los que 
+
+trabajan 8 empleados (4 mañana - 4 noche).
+
+crear un programa papu!!! que permita almacenar los sueldos
+
+de los empleados agrupados por turnos, mostrar los 
+
+gastos de la empresa por sueldos de cada turno
+
+*/
+
+import java.util.Scanner;
+
+
+
+public class vector3 {
+
+  //atributos para los turnos diurno y nocturno
+
+  private double[] sueldoDiurno = new double[4];
+
+  private double[] sueldoNocturno = new double[4];
+
+   
+
+  //metodo para registrar los sueldos
+
+  public void registrarSueldo(){
+
+    Scanner scanner = new Scanner(System.in);
+
+    System.out.println("Registra los sueldos de los empleados(4 diurno - 4 nocturno):");
+
+     
+
+    //valores de registros diurno y nocturno
+
+    int registroDiurno = 0;
+
+    int registroNocturno = 0;
+
+     
+
+    //bucle para registrar a los 8 empleados
+
+    for(int i = 1;i<=8;i++){
+
+      System.out.println("\nEmpleado "+i+" :");
+
+      //pedir turno
+
+      String turno;
+
+      while (true){
+
+        System.out.println("Ingresa el turno (diurno/nocturno): ");
+
+        turno = scanner.nextLine().trim().toLowerCase();
+
+        if(turno.equals("diurno") || turno.equals("nocturno")){
+
+          break;
+
+        }
+
+        System.out.println("Turno Invalido XD!!. Intentalo nuevamente");
+
+      }
+
+      //pedir sueldo
+
+      double sueldo = pedirSueldo(scanner);
+
+       
+
+      //asignar el sueldo al turno que le corresponde
+
+      if(turno.equals("diurno") && registroDiurno<4){
+
+        sueldoDiurno[registroDiurno] = sueldo;
+
+        registroDiurno++;
+
+      }else if(turno.equals("nocturno") && registroNocturno<4){
+
+        sueldoNocturno[registroNocturno] = sueldo;
+
+        registroNocturno++;
+
+      }else{
+
+        System.out.println("El turno:"+turno+"ya tiene 4 registros XD. Intentalo nuevamente XD");
+
+        i--; //reintentar el registro
+
+      }
+
+    }
+
+  }
+
+  //metodo pedir sueldo
+
+  private double pedirSueldo(Scanner scanner){
+
+    double sueldo;
+
+    while (true){
+
+      try{
+
+        System.out.println("Ingresa el sueldo: ");
+
+        sueldo = Double.parseDouble(scanner.nextLine().trim());
+
+        //evaluar el sueldo
+
+        if(sueldo>0){
+
+          return sueldo;
+
+        }
+
+        System.out.println("El sueldo debe ser mayor a 0. Intenta nuevamente");
+
+         
+
+      }catch(NumberFormatException e){
+
+        System.out.println("Entrada invalida. Ingresa un numero valido XD");
+
+         
+
+      }
+
+    }
+
+  }
+
+   
+
+   
+
+  //calcular el total de un arreglo de sueldos
+
+  private double calcularTotal(double[] sueldos){
+
+    double total = 0;
+
+    for(double sueldo:sueldos){
+
+      total += sueldo;
+
+    }
+
+    return total;
+
+  }
+
+   
+
+  //imprimir los gastos
+
+  private void imprimirXD(){
+
+    double totalDiurno = calcularTotal(sueldoDiurno);
+
+    double totalNocturno = calcularTotal(sueldoNocturno);
+
+     
+
+    System.out.println("\nGastos por Turno Papu");
+
+    System.out.println("Turno Diurno: S/."+totalDiurno);
+
+    System.out.println("Turno Nocturno: S/."+totalNocturno);
+
+  }
+
+   
+
+  //metodo detonante / ejecucion
+
+  public static void main(String[] args) {
+
+    //detonamos todito papu
+
+    vector3 papu = new vector3();
+
+    papu.registrarSueldo();
+
+    papu.imprimirXD();
+
+  }
+
+   
+
+}

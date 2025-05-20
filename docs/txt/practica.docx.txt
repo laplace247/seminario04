@@ -1,0 +1,24 @@
+#importar librerias
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+#generar datos para analisis
+meses = ['enero','febrero','marzo']
+inflacion = [1.2,2.5,1.8]
+
+#crear grafica
+plt.plot(meses,inflacion,marker='o',color='blue') #crear grafica lineal
+plt.title('inflacion mensual del peru')
+plt.xlabel('Meses')
+plt.ylabel('Inflacion')
+plt.xticks(rotation=45)
+plt.show()
+
+
+#datos de crecimiento del pbi
+sectores=['agricultura','mineria','comercio']
+pbi=[4.8,3.5,4.1]
+
+#crear grafica
+plt.bar(sectores,pbi,color=['green','red','brown']) #crear grafica de barras
