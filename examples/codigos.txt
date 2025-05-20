@@ -1,0 +1,155 @@
+recursividad:
+crea un programa en java que calcule el factorial de un numero ingresado por el usuario utilizando recursividad
+arbol binario:
+arboles de decision:
+clasificacion y regresion:
+algoritmos post transversal:
+diferencias entre datos e informacion:
+-----------------------------------------------
+#Prueba 01
+#importar librerias
+import numpy as np
+#crear un vector y una matriz aleatoria
+v1 = np.random.rand(5)
+m1 = np.random.rand(3,3)
+#calcula la suma de todos los elementos
+suma_m = np.sum(m1)
+producto_p = np.dot(m1,v1[2:5])
+print('Vector: ')
+print(v1)
+print('Matriz: ')
+print(m1)
+print('Suma de todos los elementos de la matriz:',suma_m)
+print('Producto punto entre el vector y una de las filas de la matriz:',producto_p)
+
+
+#Prueba 02
+#generar datos y archivo CSV
+import pandas as pd
+import numpy as np
+#crear dataframe
+data = {
+    'Producto': ['Lavadora','Celular','Celular','Lavadora','Celular','Lavadora','Televisor','Lavadora','Televisor','Televisor','Lavadora','Celular','Lavadora','Lavadora','Refrigeradora','Lavadora','Lavadora','Celular','Televisor','Lavadora','Refrigeradora','Televisor','Televisor','Televisor','Refrigeradora','Televisor','Lavadora','Celular','Refrigeradora','Televisor','Lavadora','Refrigeradora','Lavadora','Televisor','Lavadora','Celular','Refrigeradora','Lavadora','Celular','Lavadora','Lavadora','Celular','Televisor','Celular','Lavadora','Televisor','Lavadora','Celular','Televisor','Celular','Televisor','Refrigeradora','Refrigeradora','Televisor','Celular','Celular','Refrigeradora','Televisor','Televisor'],
+    'Categoria': ['Hogar','Electrónica','Electrónica','Hogar','Electrónica','Hogar','Electrónica','Hogar','Electrónica','Electrónica','Hogar','Electrónica','Hogar','Hogar','Hogar','Hogar','Hogar','Electrónica','Electrónica','Hogar','Hogar','Electrónica','Electrónica','Electrónica','Hogar','Electrónica','Hogar','Electrónica','Hogar','Electrónica','Hogar','Hogar','Hogar','Electronica','Hogar','Electrónica','Hogar','Hogar','Electrónica','Hogar','Hogar','Electrónica','Electrónica','Electrónica','Hogar','Electrónica','Hogar','Electrónica','Electrónica','Electrónica','Electrónica','Hogar','Hogar','Electrónica','Electrónica','Electrónica','Hogar','Electrónica','Electrónica'],
+    'Ventas': [1804,2347,2571,2541,1303,2617,725,1780,1183,2006,1543,947,1793,1104,894,2313,1952,2356,2689,2682,1884,2289,1321,1004,2764,856,2267,2274,1477,
+               1020,2412,1233,1602,2381,1819,1151,2217,2406,2568,761,2785,1830,2707,2486,1369,1184,2149,1432,2705,1391,1174,1460,1006,1271,772,825,1855,2705,1336]
+    }
+df1=pd.DataFrame(data)
+#guardar como archivo .csv
+df1.to_csv('ventas.csv',index=False)
+
+#Analisis de datos
+#importar librerias
+import pandas as pd
+import numpy as np
+#cargar datos de las ventas
+ventas_df = pd.read_csv('/content/ventas.csv') #carga un archivo CSV
+ventas_df.head()
+#mostrar las primeras filas del dataframe
+print(ventas_df.head())
+#calcular el promedio de ventas por categoria de producto
+promedio_ventas = ventas_df.groupby('Categoria')['Ventas'].mean()
+#mostrar los resultados
+print('Promedio de ventas por producto:')
+print(promedio_ventas)
+
+
+
+#Prueba 03
+#importar librerias
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+#configuracion
+np.random.seed(42)
+#crear los datos aleatoriamente
+meses = np.arange(1,13)
+ventas = np.random.randint(100,1000,12)
+#ajustar modelo de regresion lineal
+modelo = LinearRegression()
+modelo.fit(meses.reshape(-1,1),ventas)
+#hacer predicciones
+predicciones = modelo.predict(meses.reshape(-1,1))
+print('Ventas reales:',ventas)
+print('Predicciones:',predicciones)
+#visualizar la linea de regresion lineal
+plt.scatter(meses,ventas,color='blue',label='Ventas reales')
+plt.plot(meses,predicciones,color='red',label='Predicciones')
+plt.xlabel('Meses')
+plt.ylabel('Ventas')
+plt.title('Regresion Lineal Simple')
+plt.legend()
+plt.show()
+
+#Prueba 04
+#importar librerias
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+#genera un conjunto de datos aleatorios con dos caracteristicas
+np.random.seed(42)
+edad = np.random.randint(18,65,100)
+ingresos = np.random.randint(20000,100000,100)
+#agrupalos en tres clusteres utilizando el algoritmo k-means
+k_means = KMeans(n_clusters=3)
+clusteres = k_means.fit_predict(np.column_stack((edad,ingresos)))
+#imprime el resultado
+print(clusteres)
+
+
+#Prueba 05
+#importar librerias
+import numpy as np
+import matplotlib.pyplot as plt
+#configuracion
+np.random.seed(42)
+ingresos = np.random.randint(20000,100000,50)
+plt.hist(ingresos,bins=10)
+plt.xlabel('Ingresos Mensuales')
+plt.ylabel('Frecuencia')
+plt.title('Distribucion de Ingresos Mensuales')
+plt.show()
+
+
+#Prueba 06
+#importar librerias
+import numpy as np
+import tensorflow as tf
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, StandardScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+#genera los datos simulados
+np.random.seed(42) #configuracion 
+n_samples = 200
+#generar datos aleatorios
+X = np.random.rand(100,2) #X= dates y= temperatures
+y = np.random.randint(0,2,100)
+#crear dataframe
+df = pd.DataFrame({'x1':X[:,0],'x2':X[:,1],'y':y})
+#
+
+...
+
+
+
+#Prueba 07
+#importar librerias
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+#cargar los datos de ventas
+ventas_df = pd.read_csv('/content/ventas.csv')
+#ajustar los datos en los valores faltantes y convertir fechas
+ventas_df['Fecha'] = pd.to_datetime(ventas_df['Fecha'])
+ventas_df.set_index('Fecha',inplace=True)
+#crear un modelo de regresion lineal para predecir las ventas mensuales
+modelo = LinearRegression()
+X = ventas_df[['Mes','Año','Tipo de Producto']]
+y = ventas_df['Ventas']
+modelo.fit(X,y)
+
+...

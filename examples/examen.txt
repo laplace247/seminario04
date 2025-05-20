@@ -1,0 +1,27 @@
+1.Escribe un programa en Python que cree un vector y una matriz aleatoria utilizando Numpy. Calcula la suma de todos los elementos de la matriz y el producto punto entre el vector y una de las filas de la matriz.
+
+2.Utilizando la libreria Pandas, carga el siguiente archivo CSV llamado ventas.csv y calcula el promedio de ventas por categoria de producto
+
+3.Implementa una regresion lineal simple para predecir las ventas mensuales de un producto utilizando los datos generados aleatoriamente. Define los datos de entrenamiento y prueba
+
+4.Utilizando Scikit-Learn, genera un conjunto de datos aleatorios con dos caracteristicas (edad, ingresos) y agrupalos en tres clústeres utilizando el algoritmo K-Means.
+
+5.Crea un histograma que muestre la distribucion de los ingresos mensuales de un grupo de 50 personas generados aleatoriamente.
+
+6.Crea una red neuronal basica con TensorFlow y keras que clasifique un conjunto de datos generados aleatoriamente en dos clases
+
+7.Utiliza un grupo de datos de ventas mensuales para predecir las ventas del siguiente es en funcion de variables como el mes, el año y los tipos de productos vendidos
+
+RECURSIVIDAD
+8.Crea un programa en Java que calcula el factorial de un numero ingresado por el usuario utilizando recursividad
+ARBOL BINARIO
+9.
+ARBOLES DE DECISION
+10.
+CLASIFICACION Y REGRESION
+11.
+ALGORITMOS POST TRANSVERSAL 
+12.
+DIFERENCIAS ENTRE DATOS E INFORMACION 
+
+
