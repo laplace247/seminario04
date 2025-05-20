@@ -1,0 +1,1124 @@
+
+
+    #Generar datos y archivo CSV
+    import numpy as np
+    import pandas as pd
+
+    #configuracion
+    np.random.seed(42)
+
+    #Generar ventas mensuales
+    def generar_datos_ventas(nombre_empresa,productos,start,end):
+      meses = pd.date_range(start=start,end=end,freq='M')
+      datos_ventas = pd.DataFrame({
+        'Meses':meses,
+        **{producto:np.random.randint(1000,5000,size=len(meses)) for producto in productos}
+    })
+
+    #Guardar el dataframe con csv
+      datos_ventas.to_csv(f'/content/{nombre_empresa}.csv',index=False)
+
+    #Definir el nombre de las empresas
+    empresas = {
+        'Heladeria':['Chocolate','Fresa','Vainilla','Mango'],
+        'Restaurante':['Pasta','Pizza','Ensalada','Sushi'],
+        'Tienda_de_Ropa':['Camisetas','Pantalones','Zapatos','Gorras'],
+        'Libreria':['Ficcion','Accion','Historia','Suspenso']
+    }
+
+    #Generar datos y guardalos como csv
+    for nombre_empresa,productos in empresas.items():
+        generar_datos_ventas(nombre_empresa,productos,start='2020-01-20',end='2024-09-30')
+
+    <ipython-input-3-08d18a3c8b77>:10: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
+      meses = pd.date_range(start=start,end=end,freq='M')
+
+    #Analisis de datos
+    #Importar librerias
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    #cargar los datos de ventas de la heladeria
+    heladeria_df = pd.read_csv('/content/Heladeria.csv')
+
+    #Mostrar las primeras filas del dataframe
+    print(heladeria_df.head())
+
+    #calcular el promedio de ventas por sabor de helado
+    promedio_ventas_helados = heladeria_df[['Chocolate','Fresa','Vainilla','Mango']].mean()
+
+    #Mostrar los resultados
+    print('Promedio de ventas por producto')
+    print(promedio_ventas_helados)
+
+    #identificar le producto con mayor venta
+    producto_recomendado = promedio_ventas_helados.idxmax()
+    print("\n")
+    print(f'Se recomienda invertir mas en el producto: {producto_recomendado} para octubre del 2024')
+
+    #ingresamos una grafica de los productos / barras
+    plt.figure(figsize=(8,6))
+    promedio_ventas_helados.plot(kind='bar',color=['brown','pink','blue','orange'])
+    plt.title('Promedio de ventas por producto en Heladeria')
+    plt.xlabel('Sabores')
+    plt.ylabel('Promedio de ventas')
+    plt.xticks(rotation=0)
+    plt.show()
+
+            Meses  Chocolate  Fresa  Vainilla  Mango
+    0  2020-01-31       4174   2528      2275   3146
+    1  2020-02-29       4507   4202      2016   3731
+    2  2020-03-31       1860   4556      4773   2895
+    3  2020-04-30       2294   4890      3343   3773
+    4  2020-05-31       2130   1646      4796   2570
+    Promedio de ventas por producto
+    Chocolate    3045.350877
+    Fresa        3192.701754
+    Vainilla     3006.807018
+    Mango        3122.473684
+    dtype: float64
+
+
+    Se recomienda invertir mas en el producto: Fresa para octubre del 2024
+
+[]
+
+    #con prediccion para el 2025
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.preprocessing import MinMaxScaler #escalar datos entre 0 y 1
+    from tensorflow.keras.models import Sequential #crear el modelo de red neuronal (manera secuencial)
+    from tensorflow.keras.layers import Dense #capa conectada de a una red neuronal
+
+    #cargar los datos de la heladeria
+    heladeria_df = pd.read_csv('/content/Heladeria.csv') #carga una archivo CSV
+
+    #seleccionar solo las cols de venta sin la col de meses
+    X = heladeria_df[['Chocolate','Fresa','Vainilla','Mango']].values #convierte en arreglos de valores numericos para X
+
+    #escalar los datos dntre 0 y 1
+    scaler = MinMaxScaler() #creando al metodo,
+    X_scaled = scaler.fit_transform(X) #para escalar los valores de las ventas en un rango de 0 y 1
+
+    #crear las etiquetas (Y) con los mismos datos de las ventas, desplazado en el tiempo
+    Y = np.roll(X_scaled, -1, axis=0)
+    #los valores en Y seran los mismos valores de ventas, pero seran desplazados
+    #para intentar predecir las ventas del siguiente periodo
+
+    #voy a separar los datos de entrenamiento y validacion
+    X_train, Y_train = X_scaled[:-1], Y[:-1]
+    #se eliminan las ultimas filas por el desplazamiento para X_train
+    #X_train contendra los datos escalados de ventas y
+    #Y_train contendra las etiquetas que son las ventas desplazadas
+
+    #definir el modelo
+    model = Sequential() #se inicializa un modulo secuencial de red neuronal
+    model.add(Dense(128,input_dim=X_train.shape[1],activation='relu'))
+    #se añade primera capa densa (128 neuronas) con funcion de de activacion (relu)
+    #la dimension de entrada es el numero de columnas de X_train (ventas de 4 sabores)
+    model.add(Dense(64,activation='relu'))
+    #es la segunda capa con 64 neuronas y activacion relu
+    model.add(Dense(4,activation='linear'))
+    #capa de salida con 4 neuronas (una por sabor de helado)
+    #y activacion lineal, devuelve los valores sin modificadores
+
+    #compilar el modelo
+    model.compile(optimizer='adam',loss='mean_squared_error')
+    #optimizar por 'adam' es un poderoso algoritmo para optimizar modelos de redes neuronales
+    #loss--> la funcion de error cuadratico medio(mse)
+    #este mide las dif. entre las predicciones y los valores reales
+
+    #entrenar el modelo
+    history = model.fit(X_train,Y_train,epochs=100,batch_size=32,verbose=1)
+    #prediccion para las ventas del 2025
+    prediccion_2025 = model.predict(X_scaled[-1:].reshape(1,-1))
+    ventas_2025 = scaler.inverse_transform(prediccion_2025) #desescalar los valores
+    #para poder mostrar las predicciones de ventas del 2025
+    productos =['Chocolate','Fresa','Vainilla','Mango']
+    ventas_2025 = ventas_2025.flatten()
+    for i, producto in enumerate(productos): #i, es el recorrido
+      print(f'Prediccion de ventas para {producto} en 2025: {ventas_2025[i]}')
+
+    #agregamos grafica
+    plt.figure(figsize=(8,6))
+    plt.bar(productos, ventas_2025 ,color=['brown','pink','blue','orange'])
+    plt.title('Promedio de ventas por producto en Heladeria para 2025')
+    plt.xlabel('Sabores')
+    plt.ylabel('Ventas Proyectadas')
+    plt.xticks(rotation=0)
+    plt.show()
+
+    /usr/local/lib/python3.10/dist-packages/keras/src/layers/core/dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+    Epoch 1/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 2s 24ms/step - loss: 0.3832
+    Epoch 2/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.3151 
+    Epoch 3/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.2577
+    Epoch 4/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - loss: 0.2076
+    Epoch 5/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.1744 
+    Epoch 6/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.1496 
+    Epoch 7/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step - loss: 0.1289
+    Epoch 8/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - loss: 0.1104
+    Epoch 9/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step - loss: 0.1095
+    Epoch 10/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 16ms/step - loss: 0.1087
+    Epoch 11/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - loss: 0.1045
+    Epoch 12/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - loss: 0.1039 
+    Epoch 13/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - loss: 0.1047
+    Epoch 14/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 15ms/step - loss: 0.1020 
+    Epoch 15/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.1003 
+    Epoch 16/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0976 
+    Epoch 17/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0991
+    Epoch 18/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 18ms/step - loss: 0.1002 
+    Epoch 19/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - loss: 0.0947 
+    Epoch 20/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - loss: 0.0927
+    Epoch 21/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0951 
+    Epoch 22/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - loss: 0.0909
+    Epoch 23/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0892
+    Epoch 24/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0903 
+    Epoch 25/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - loss: 0.0912
+    Epoch 26/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0910 
+    Epoch 27/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0884 
+    Epoch 28/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0885 
+    Epoch 29/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0870 
+    Epoch 30/100
+
+    #Analisis de datos
+    #importar librerías
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    #cargar los datos de ventas del restaurante
+    restaurante_df = pd.read_csv('/content/Restaurante.csv')
+
+    #Mostrar las primeras filas del dataframe
+    print(restaurante_df.head())
+
+    #calcular el promedio de ventas por tipo de plato
+    promedio_ventas_platos = restaurante_df[['Pasta','Pizza','Ensalada','Sushi']].mean()
+
+    #Mostrar los resultados
+    print('Promedio de ventas por producto')
+    print(promedio_ventas_platos)
+
+    #identificar le producto con mayor venta
+    producto_recomendado = promedio_ventas_platos.idxmax() #determina el producto con las ventas promedio más alta
+    print(f'Se recomienda invertir mas en el producto: {producto_recomendado} para octubre del 2024')
+
+    #ingresamos una grafica de los productos / barras
+    plt.figure(figsize=(8,6)) #proporciones del grafico
+    promedio_ventas_platos.plot(kind='bar',color=['red','green','pink','purple']) #color de las barras en el grafico
+    plt.title('Promedio de ventas por producto en Restaurante') #titulo del grafico
+    plt.xlabel('Platos') #etiqueta al eje x del gráfico
+    plt.ylabel('Promedio de ventas') #etiqueta al eje y del gráfico
+    plt.xticks(rotation=0) #orientación de las etiquetas en el eje x del gráfico
+    plt.show() #mostrar el gráfico creado
+
+            Meses  Pasta  Pizza  Ensalada  Sushi
+    0  2020-01-31   2051   4152      3911   4183
+    1  2020-02-29   2643   1698      2734   3557
+    2  2020-03-31   4627   3160      2843   2496
+    3  2020-04-30   2363   1001      1488   1098
+    4  2020-05-31   4869   1641      3976   3200
+    Promedio de ventas por producto
+    Pasta       3226.859649
+    Pizza       2917.228070
+    Ensalada    2989.140351
+    Sushi       2897.877193
+    dtype: float64
+
+
+    Se recomienda invertir mas en el producto: Pasta para octubre del 2024
+
+[]
+
+    #con prediccion para el 2025
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.preprocessing import MinMaxScaler
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Dense
+
+    restaurante_df = pd.read_csv('/content/Restaurante.csv')
+    X = restaurante_df[['Pasta','Pizza','Ensalada','Sushi']].values
+
+    scaler = MinMaxScaler()
+    X_scaled = scaler.fit_transform(X)
+    Y = np.roll(X_scaled, -1, axis=0)
+    X_train, Y_train = X_scaled[:-1], Y[:-1]
+
+    model = Sequential()
+    model.add(Dense(128,input_dim=X_train.shape[1],activation='relu'))
+    model.add(Dense(64,activation='relu'))
+    model.add(Dense(4,activation='linear'))
+    model.compile(optimizer='adam',loss='mean_squared_error')
+
+    history = model.fit(X_train,Y_train,epochs=100,batch_size=32,verbose=1)
+    prediccion_2025 = model.predict(X_scaled[-1:].reshape(1,-1))
+    ventas_2025 = scaler.inverse_transform(prediccion_2025)
+    productos =['Pasta','Pizza','Ensalada','Sushi']
+    ventas_2025 = ventas_2025.flatten()
+    for i, producto in enumerate(productos):
+      print(f'Prediccion de ventas para {producto} en 2025: {ventas_2025[i]}')
+
+    producto_recomendado = promedio_ventas_platos.idxmax()
+    print("\n")
+    print(f'Se recomienda invertir mas en el producto: {producto_recomendado} para octubre del 2024')
+
+    plt.figure(figsize=(8,6))
+    plt.bar(productos, ventas_2025 ,color=['red','green','pink','purple'])
+    plt.title('Promedio de ventas por producto en Restaurante para 2025')
+    plt.xlabel('Platos')
+    plt.ylabel('Ventas Proyectadas')
+    plt.xticks(rotation=0)
+    plt.show()
+
+    Epoch 1/100
+
+    /usr/local/lib/python3.10/dist-packages/keras/src/layers/core/dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 1s 9ms/step - loss: 0.2549
+    Epoch 2/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.2036 
+    Epoch 3/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.1580 
+    Epoch 4/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.1272 
+    Epoch 5/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.1034 
+    Epoch 6/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0969 
+    Epoch 7/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0983 
+    Epoch 8/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - loss: 0.1038
+    Epoch 9/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.1028 
+    Epoch 10/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.1067 
+    Epoch 11/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0974 
+    Epoch 12/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0945 
+    Epoch 13/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0940
+    Epoch 14/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0913
+    Epoch 15/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0899 
+    Epoch 16/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0883 
+    Epoch 17/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0930 
+    Epoch 18/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0834  
+    Epoch 19/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0852 
+    Epoch 20/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0891 
+    Epoch 21/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0838 
+    Epoch 22/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0834 
+    Epoch 23/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0802 
+    Epoch 24/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0825 
+    Epoch 25/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0785
+    Epoch 26/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0811
+    Epoch 27/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0751 
+    Epoch 28/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0763 
+    Epoch 29/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0783 
+    Epoch 30/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0752 
+    Epoch 31/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0730 
+    Epoch 32/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0772
+    Epoch 33/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0788  
+    Epoch 34/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0730 
+    Epoch 35/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0758 
+    Epoch 36/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0766
+    Epoch 37/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0759
+    Epoch 38/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0713
+    Epoch 39/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step - loss: 0.0764
+    Epoch 40/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0702 
+    Epoch 41/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 12ms/step - loss: 0.0723
+    Epoch 42/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0689 
+    Epoch 43/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0703 
+    Epoch 44/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0714 
+    Epoch 45/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - loss: 0.0681
+    Epoch 46/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0677  
+    Epoch 47/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0697 
+    Epoch 48/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0658 
+    Epoch 49/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0705 
+    Epoch 50/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0677 
+    Epoch 51/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0659 
+    Epoch 52/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0704 
+    Epoch 53/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0663 
+    Epoch 54/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0649 
+    Epoch 55/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0645 
+    Epoch 56/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0651 
+    Epoch 57/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0661 
+    Epoch 58/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0675 
+    Epoch 59/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0685 
+    Epoch 60/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0619 
+    Epoch 61/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0631 
+    Epoch 62/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0650 
+    Epoch 63/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0620 
+    Epoch 64/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0627 
+    Epoch 65/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0610 
+    Epoch 66/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0658 
+    Epoch 67/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0631 
+    Epoch 68/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - loss: 0.0617
+    Epoch 69/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0637
+    Epoch 70/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0655 
+    Epoch 71/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0628 
+    Epoch 72/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0627 
+    Epoch 73/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0612 
+    Epoch 74/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0597 
+    Epoch 75/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0588 
+    Epoch 76/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0612 
+    Epoch 77/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0593 
+    Epoch 78/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0602 
+    Epoch 79/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0597 
+    Epoch 80/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0577 
+    Epoch 81/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0587 
+    Epoch 82/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0597 
+    Epoch 83/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0570 
+    Epoch 84/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0573 
+    Epoch 85/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - loss: 0.0585
+    Epoch 86/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0608
+    Epoch 87/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0558 
+    Epoch 88/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0555 
+    Epoch 89/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0590 
+    Epoch 90/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0584 
+    Epoch 91/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0596 
+    Epoch 92/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0588 
+    Epoch 93/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0577 
+    Epoch 94/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0552 
+    Epoch 95/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0571 
+    Epoch 96/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0552 
+    Epoch 97/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0530 
+    Epoch 98/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0537 
+    Epoch 99/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0567 
+    Epoch 100/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0546 
+    1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 58ms/step
+    Prediccion de ventas para Pasta en 2025: 4216.2734375
+    Prediccion de ventas para Pizza en 2025: 3809.35546875
+    Prediccion de ventas para Ensalada en 2025: 2868.955810546875
+    Prediccion de ventas para Sushi en 2025: 4232.0986328125
+
+
+    Se recomienda invertir mas en el producto: Pasta para octubre del 2024
+
+[]
+
+    #Analisis de datos
+    #importar librerías
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    #cargar los datos de ventas del restaurante
+    libreria_df = pd.read_csv('/content/Libreria.csv')
+
+    #Mostrar las primeras filas del dataframe
+    print(libreria_df.head())
+
+    #calcular el promedio de ventas por tipo de plato
+    promedio_ventas_generos = libreria_df[['Ficcion','Accion','Historia','Suspenso']].mean()
+
+    #Mostrar los resultados
+    print('Promedio de ventas por producto')
+    print(promedio_ventas_generos)
+
+    #identificar le producto con mayor venta
+    producto_recomendado = promedio_ventas_generos.idxmax()
+    print("\n")
+    print(f'Se recomienda invertir mas en el producto: {producto_recomendado} para octubre del 2024')
+
+    #ingresamos una grafica de los productos / barras
+    plt.figure(figsize=(8,6))
+    promedio_ventas_generos.plot(kind='bar',color=['blue','pink','black','green'])
+    plt.title('Promedio de ventas por producto en Libreria')
+    plt.xlabel('Generos')
+    plt.ylabel('Promedio de ventas')
+    plt.xticks(rotation=0)
+    plt.show()
+
+            Meses  Ficcion  Accion  Historia  Suspenso
+    0  2020-01-31     1515    4146      4455      2445
+    1  2020-02-29     4087    1412      4635      3386
+    2  2020-03-31     3839    4447      1850      4719
+    3  2020-04-30     1335    4491      4577      2519
+    4  2020-05-31     2782    1728      2390      2388
+    Promedio de ventas por producto
+    Ficcion     3089.824561
+    Accion      3108.543860
+    Historia    3205.087719
+    Suspenso    2742.771930
+    dtype: float64
+
+
+    Se recomienda invertir mas en el producto: Historia para octubre del 2024
+
+[]
+
+    #con prediccion para el 2025
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.preprocessing import MinMaxScaler
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Dense
+
+    #cargar los datos de la heladeria
+    libreria_df = pd.read_csv('/content/Libreria.csv')
+    X = libreria_df[['Ficcion','Accion','Historia','Suspenso']].values
+
+    scaler = MinMaxScaler()
+    X_scaled = scaler.fit_transform(X)
+    Y = np.roll(X_scaled, -1, axis=0)
+    X_train, Y_train = X_scaled[:-1], Y[:-1]
+
+    model = Sequential()
+    model.add(Dense(128,input_dim=X_train.shape[1],activation='relu'))
+    model.add(Dense(64,activation='relu'))
+    model.add(Dense(4,activation='linear'))
+    model.compile(optimizer='adam',loss='mean_squared_error')
+
+    history = model.fit(X_train,Y_train,epochs=100,batch_size=32,verbose=1)
+    prediccion_2025 = model.predict(X_scaled[-1:].reshape(1,-1))
+    ventas_2025 = scaler.inverse_transform(prediccion_2025)
+    productos =['Ficcion','Accion','Historia','Suspenso']
+    ventas_2025 = ventas_2025.flatten()
+    for i, producto in enumerate(productos):
+      print(f'Prediccion de ventas para {producto} en 2025: {ventas_2025[i]}')
+
+    plt.figure(figsize=(8,6))
+    plt.bar(productos, ventas_2025 ,color=['blue','pink','black','green'])
+    plt.title('Promedio de ventas por producto en Libreria para 2025')
+    plt.xlabel('Generos')
+    plt.ylabel('Ventas Proyectadas')
+    plt.xticks(rotation=0)
+    plt.show()
+
+    Epoch 1/100
+
+    /usr/local/lib/python3.10/dist-packages/keras/src/layers/core/dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 1s 9ms/step - loss: 0.3571
+    Epoch 2/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.3075  
+    Epoch 3/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.2627
+    Epoch 4/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.2058 
+    Epoch 5/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.1657 
+    Epoch 6/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - loss: 0.1363
+    Epoch 7/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.1208 
+    Epoch 8/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step - loss: 0.1076
+    Epoch 9/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 14ms/step - loss: 0.1029
+    Epoch 10/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0977 
+    Epoch 11/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0957 
+    Epoch 12/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0995 
+    Epoch 13/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.1031 
+    Epoch 14/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0974 
+    Epoch 15/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0922 
+    Epoch 16/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0946 
+    Epoch 17/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0883 
+    Epoch 18/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0872 
+    Epoch 19/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0872 
+    Epoch 20/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0889 
+    Epoch 21/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 0.0877 
+    Epoch 22/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0857 
+    Epoch 23/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0846 
+    Epoch 24/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0869 
+    Epoch 25/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0843 
+    Epoch 26/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0850 
+    Epoch 27/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0861 
+    Epoch 28/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0804 
+    Epoch 29/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0791 
+    Epoch 30/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0808 
+    Epoch 31/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0802 
+    Epoch 32/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0808 
+    Epoch 33/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0833 
+    Epoch 34/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0781
+    Epoch 35/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0798 
+    Epoch 36/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - loss: 0.0780
+    Epoch 37/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0789
+    Epoch 38/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0795 
+    Epoch 39/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0799 
+    Epoch 40/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0770 
+    Epoch 41/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0786 
+    Epoch 42/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0791 
+    Epoch 43/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0746 
+    Epoch 44/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0761 
+    Epoch 45/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0758 
+    Epoch 46/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0764 
+    Epoch 47/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0756 
+    Epoch 48/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0766 
+    Epoch 49/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0739 
+    Epoch 50/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0771 
+    Epoch 51/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0716 
+    Epoch 52/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0717 
+    Epoch 53/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0750 
+    Epoch 54/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0727 
+    Epoch 55/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0728 
+    Epoch 56/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0752 
+    Epoch 57/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0730 
+    Epoch 58/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0727 
+    Epoch 59/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0719 
+    Epoch 60/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0723 
+    Epoch 61/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0724 
+    Epoch 62/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0728 
+    Epoch 63/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0720 
+    Epoch 64/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0686 
+    Epoch 65/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0690 
+    Epoch 66/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0723 
+    Epoch 67/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0713 
+    Epoch 68/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0687 
+    Epoch 69/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0684 
+    Epoch 70/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0688 
+    Epoch 71/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0691 
+    Epoch 72/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0682 
+    Epoch 73/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0665 
+    Epoch 74/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0661 
+    Epoch 75/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - loss: 0.0675
+    Epoch 76/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 11ms/step - loss: 0.0711
+    Epoch 77/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0680 
+    Epoch 78/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0643 
+    Epoch 79/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0679 
+    Epoch 80/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0665 
+    Epoch 81/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0691 
+    Epoch 82/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0662 
+    Epoch 83/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0678 
+    Epoch 84/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0668 
+    Epoch 85/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0666 
+    Epoch 86/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0669 
+    Epoch 87/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0666 
+    Epoch 88/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0664 
+    Epoch 89/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0664 
+    Epoch 90/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0654 
+    Epoch 91/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0648 
+    Epoch 92/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0660 
+    Epoch 93/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0647 
+    Epoch 94/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0648
+    Epoch 95/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0625 
+    Epoch 96/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0629 
+    Epoch 97/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 13ms/step - loss: 0.0619
+    Epoch 98/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0642 
+    Epoch 99/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0642 
+    Epoch 100/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0665 
+    1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+    Prediccion de ventas para Ficcion en 2025: 3334.755126953125
+    Prediccion de ventas para Accion en 2025: 2701.403076171875
+    Prediccion de ventas para Historia en 2025: 3362.09521484375
+    Prediccion de ventas para Suspenso en 2025: 2972.812744140625
+
+[]
+
+    #Analisis de datos
+    #importar librerías
+    import pandas as pd
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    #cargar los datos de ventas del restaurante
+    tienda_df = pd.read_csv('/content/Tienda_de_Ropa.csv')
+
+    #Mostrar las primeras filas del dataframe
+    print(tienda_df.head())
+
+    #calcular el promedio de ventas por tipo de plato
+    promedio_ventas_accesorios = tienda_df[['Camisetas','Pantalones','Zapatos','Gorras']].mean()
+
+    #Mostrar los resultados
+    print('Promedio de ventas por producto')
+    print(promedio_ventas_accesorios)
+
+    #identificar le producto con mayor venta
+    producto_recomendado = promedio_ventas_accesorios.idxmax()
+    print("\n")
+    print(f'Se recomienda invertir mas en el producto: {producto_recomendado} para octubre del 2024')
+
+    #ingresamos una grafica de los productos / barras
+    plt.figure(figsize=(8,6))
+    promedio_ventas_accesorios.plot(kind='bar',color=['pink','green','blue','brown'])
+    plt.title('Promedio de ventas por producto en Tienda de Ropa')
+    plt.xlabel('Accessorios')
+    plt.ylabel('Promedio de ventas')
+    plt.xticks(rotation=0)
+    plt.show()
+
+            Meses  Camisetas  Pantalones  Zapatos  Gorras
+    0  2020-01-31       4067        2409     3491    4308
+    1  2020-02-29       4900        1784     3660    4956
+    2  2020-03-31       1815        4175     4040    1896
+    3  2020-04-30       1658        4464     3311    4343
+    4  2020-05-31       4587        4882     4124    2212
+    Promedio de ventas por producto
+    Camisetas     3004.157895
+    Pantalones    2989.719298
+    Zapatos       2822.771930
+    Gorras        3181.666667
+    dtype: float64
+
+
+    Se recomienda invertir mas en el producto: Gorras para octubre del 2024
+
+[]
+
+    #con prediccion para el 2025
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.preprocessing import MinMaxScaler
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Dense
+
+    tienda_df = pd.read_csv('/content/Tienda_de_Ropa.csv')
+    X = tienda_df[['Camisetas','Pantalones','Zapatos','Gorras']].values
+
+    scaler = MinMaxScaler()
+    X_scaled = scaler.fit_transform(X)
+    Y = np.roll(X_scaled, -1, axis=0)
+    X_train, Y_train = X_scaled[:-1], Y[:-1]
+
+    model = Sequential()
+    model.add(Dense(128,input_dim=X_train.shape[1],activation='relu'))
+    model.add(Dense(64,activation='relu'))
+    model.add(Dense(4,activation='linear'))
+
+    model.compile(optimizer='adam',loss='mean_squared_error')
+    history = model.fit(X_train,Y_train,epochs=100,batch_size=32,verbose=1)
+    prediccion_2025 = model.predict(X_scaled[-1:].reshape(1,-1))
+    ventas_2025 = scaler.inverse_transform(prediccion_2025)
+    productos =['Camisetas','Pantalones','Zapatos','Gorras']
+    ventas_2025 = ventas_2025.flatten()
+    for i, producto in enumerate(productos):
+      print(f'Prediccion de ventas para {producto} en 2025: {ventas_2025[i]}')
+
+    plt.figure(figsize=(8,6))
+    plt.bar(productos, ventas_2025 ,color=['pink','green','blue','brown'])
+    plt.title('Promedio de ventas por producto en Tienda de Ropa para 2025')
+    plt.xlabel('Accessorios')
+    plt.ylabel('Ventas Proyectadas')
+    plt.xticks(rotation=0)
+    plt.show()
+
+    Epoch 1/100
+
+    /usr/local/lib/python3.10/dist-packages/keras/src/layers/core/dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 1s 7ms/step - loss: 0.2812  
+    Epoch 2/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.2397 
+    Epoch 3/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.1968 
+    Epoch 4/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.1599 
+    Epoch 5/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.1401 
+    Epoch 6/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.1139 
+    Epoch 7/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.1093 
+    Epoch 8/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0985 
+    Epoch 9/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0979 
+    Epoch 10/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0955 
+    Epoch 11/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.1023 
+    Epoch 12/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.1000 
+    Epoch 13/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.1017 
+    Epoch 14/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0943 
+    Epoch 15/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0956
+    Epoch 16/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0880 
+    Epoch 17/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0904 
+    Epoch 18/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0893 
+    Epoch 19/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0867 
+    Epoch 20/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0900 
+    Epoch 21/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0856 
+    Epoch 22/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0889 
+    Epoch 23/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0801 
+    Epoch 24/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0867 
+    Epoch 25/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0829 
+    Epoch 26/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0860 
+    Epoch 27/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0853 
+    Epoch 28/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0850 
+    Epoch 29/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0838 
+    Epoch 30/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0853 
+    Epoch 31/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0803 
+    Epoch 32/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0806 
+    Epoch 33/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0802 
+    Epoch 34/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0780 
+    Epoch 35/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0770 
+    Epoch 36/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0751 
+    Epoch 37/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0773 
+    Epoch 38/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0742 
+    Epoch 39/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0773 
+    Epoch 40/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0793
+    Epoch 41/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0767 
+    Epoch 42/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0777 
+    Epoch 43/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0750 
+    Epoch 44/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0745 
+    Epoch 45/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0730 
+    Epoch 46/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0739 
+    Epoch 47/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0740 
+    Epoch 48/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0730 
+    Epoch 49/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0768 
+    Epoch 50/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0721 
+    Epoch 51/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0747 
+    Epoch 52/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0735 
+    Epoch 53/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0715 
+    Epoch 54/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0719 
+    Epoch 55/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0696 
+    Epoch 56/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0707 
+    Epoch 57/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0694 
+    Epoch 58/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0740 
+    Epoch 59/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0709 
+    Epoch 60/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0692 
+    Epoch 61/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0714 
+    Epoch 62/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0725 
+    Epoch 63/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0723 
+    Epoch 64/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0697 
+    Epoch 65/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0680 
+    Epoch 66/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0671 
+    Epoch 67/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0685 
+    Epoch 68/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0695 
+    Epoch 69/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0667 
+    Epoch 70/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0677 
+    Epoch 71/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0678 
+    Epoch 72/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0687 
+    Epoch 73/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0669 
+    Epoch 74/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0660 
+    Epoch 75/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0652 
+    Epoch 76/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0689 
+    Epoch 77/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0687 
+    Epoch 78/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0659 
+    Epoch 79/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0667 
+    Epoch 80/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0659 
+    Epoch 81/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0673 
+    Epoch 82/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0649 
+    Epoch 83/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0642 
+    Epoch 84/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0656 
+    Epoch 85/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0637 
+    Epoch 86/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0645 
+    Epoch 87/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - loss: 0.0637 
+    Epoch 88/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0641 
+    Epoch 89/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0621 
+    Epoch 90/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 0.0647 
+    Epoch 91/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0634 
+    Epoch 92/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0635
+    Epoch 93/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0631 
+    Epoch 94/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0629 
+    Epoch 95/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 10ms/step - loss: 0.0598
+    Epoch 96/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0664 
+    Epoch 97/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0599 
+    Epoch 98/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0616 
+    Epoch 99/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 0.0615 
+    Epoch 100/100
+    2/2 ━━━━━━━━━━━━━━━━━━━━ 0s 8ms/step - loss: 0.0623 
+    1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 51ms/step
+    Prediccion de ventas para Camisetas en 2025: 1912.5889892578125
+    Prediccion de ventas para Pantalones en 2025: 2434.57568359375
+    Prediccion de ventas para Zapatos en 2025: 2990.167724609375
+    Prediccion de ventas para Gorras en 2025: 2994.700927734375
+
+[]

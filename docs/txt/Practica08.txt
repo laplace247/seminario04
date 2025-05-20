@@ -1,0 +1,542 @@
+
+
+
+    # REGRESION LINEAL SIMPLE
+    # Importar las librerías necesarias
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from sklearn.linear_model import LinearRegression
+
+    # Datos de ejemplo: cantidad de ventas (X) y precio del producto (y)
+    X = np.array([[1], [2], [3], [4], [5]]) # Cantidad de ventas
+    y = np.array([10, 15, 20, 25, 30]) # Precio del producto
+
+    # Crear el modelo de regresión lineal
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Hacer predicciones
+    y_pred = model.predict(X)
+    # Visualizar la línea de regresión
+    plt.scatter(X, y, color='blue', label='Datos Reales') # Puntos de datos
+    plt.plot(X, y_pred, color='red', label='Línea de Regresión') # Línea de regresión
+    plt.title('Regresión Lineal Simple')
+    plt.xlabel('Cantidad de Ventas')
+    plt.ylabel('Precio del Producto')
+    plt.legend()
+    plt.show()
+    # Coeficientes
+    print(f'Intercepto: {model.intercept_}')
+    print(f'Pendiente: {model.coef_[0]}')
+
+    # NOTA
+    # X es constante
+    # y es variable
+
+[]
+
+    Intercepto: 5.0000000000000036
+    Pendiente: 4.999999999999999
+
+Ejercicio 1: Dado un conjunto de datos que relaciona las horas de
+estudio con las calificaciones de los estudiantes, crea un modelo de
+regresión lineal simple y predice la calificación para 4 horas de
+estudio.
+
+    #importar librerias
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from sklearn.linear_model import LinearRegression
+
+    #crear datos de ejemplos de horas de estudio(X) y calificaciones(y)
+    X = np.array([[1], [1.5], [2], [2.3], [3.2], [4], [5], [7.6], [8], [10]]) #Horas de estudio
+    y = np.array([2,3,5,7,8.5,12,13.5,14,18,19.8]) #Calificaciones
+
+    #crear el modelo de regresion lineal
+    model = LinearRegression()
+    model.fit(X, y)
+
+    #hacer predicciones
+    calif_pred = model.predict([[4.5]])
+    print(f'La calificacion para 4.5 horas de estudio es: {calif_pred[0]}')
+
+    #visualizar los datos
+    plt.scatter(X, y, color='blue', label='Datos Registrados Reales')
+    plt.plot(X, model.predict(X), color='red', label='Línea de Regresión')
+    plt.title('Regresión Lineal Simple Ejercicio 01')
+    plt.xlabel('Horas de Estudio')
+    plt.ylabel('Calificaciones')
+    plt.legend()
+    plt.show()
+
+    #valores de coeficientes
+    print(f'Intercepto: {model.intercept_}')
+    print(f'Pendiente: {model.coef_[0]}')
+
+    La calificacion para 24 horas de estudio es: 47.547298670114515
+
+[]
+
+    Intercepto: 1.7737486147026242
+    Pendiente: 1.9072312523088286
+
+Ejercicio 2: Usa datos de la temperatura y el consumo de helados para
+construir un modelo de regresión lineal simple. Predice el consumo de
+helados a una temperatura de 30 grados.
+
+    #importar las librerias
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from sklearn.linear_model import LinearRegression
+
+    #crear los datos para la temperatura(X) y consumo de datos(y)
+    X = np.array([[10], [13], [17], [20], [22], [28], [36], [38], [40], [44]]) #Temperatura para consumo de helados
+    y = np.array([500, 800, 1186, 3000, 3652, 3856, 4050, 5168, 6002, 7010]) #Helados consumidos
+
+    #crear modelo
+    model = LinearRegression()
+    model.fit(X, y)
+
+    #hacer predicciones
+    consumo_pred = model.predict([[30]])
+    print(f'El consumo de helados a una temperatura de 30 grados es: {consumo_pred[0]}')
+
+    #visualizar la linea de regresion
+    plt.scatter(X, y, color='blue', label='Datos Reales')
+    plt.plot(X, model.predict(X), color='red', label='Regresión Lineal')
+    plt.title('Regresión Lineal Simple Ejercicio 02')
+    plt.xlabel('Temperatura')
+    plt.ylabel('Consumo de Helados')
+    plt.legend()
+    plt.show()
+
+    #valores de coeficientes
+    print(f'Intercepto: {model.intercept_}')
+    print(f'Pendiente: {model.coef_[0]}')
+
+    El consumo de helados a una temperatura de 30 grados es: 4081.5386480751745
+
+[]
+
+    Intercepto: -1160.386177629583
+    Pendiente: 174.7308275234919
+
+Ejercicio 3: Crea un modelo de regresión lineal simple utilizando el
+número de seguidores de un influencer y las interacciones (likes,
+comentarios) en sus publicaciones. Predice las interacciones para un
+influencer con 20,000 seguidores.
+
+    #importar las librerias
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from sklearn.linear_model import LinearRegression
+    #crear los datos
+    X=np.array([[1000000], [3000000], [10000000], [21000000], [33000000], [50000000]]) #seguidores
+    y=np.array([159753, 183957, 258963, 295741, 389472, 807456]) #interacciones
+    #ajustar modelo de regresion lineal
+    model=LinearRegression()
+    model.fit(X, y)
+    #hacer predicciones
+    interacciones_pred = model.predict(np.array([[100000000]]))
+    print(f'Las interacciones para un influencer con 20,000 seguidores es: {interacciones_pred[0]}')
+    #visualizar la linea de regresion
+    plt.scatter(X, y, color='blue', label='Datos Reales')
+    plt.plot(X, model.predict(X), color='red', label='Regresión Lineal')
+    plt.title('Regresión Lineal Simple Ejercicio 03')
+    plt.xlabel('Seguidores')
+    plt.ylabel('Nro Interacciones')
+    plt.legend()
+    plt.show()
+    #valores de coeficientes
+    print(f'Intercepto: {model.intercept_}')
+    print(f'Pendiente: {model.coef_[0]}')
+
+    Las interacciones para un influencer con 20,000 seguidores es: 1299835.685415903
+
+[]
+
+    Intercepto: 116501.22224257977
+    Pendiente: 0.011833344631733233
+
+    #Sobre un influencer
+    #importar las librerias
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from sklearn.linear_model import LinearRegression
+    #crear los datos
+    X=np.array([[1000000], [3000000], [10000000], [21000000], [33000000], [50000000]]) #seguidores
+    y=np.array([159753, 183957, 258963, 295741, 389472, 807456]) #interacciones
+    #ajustar modelo de regresion lineal
+    model=LinearRegression()
+    model.fit(X, y)
+    #hacer predicciones
+    interacciones_pred = model.predict(np.array([[996538]]))
+    print(f'Las interacciones para un influencer con 996,538 seguidores es: {interacciones_pred[0]}')
+    #visualizar la linea de regresion
+    plt.scatter(X, y, color='blue', label='Datos Reales')
+    plt.plot(X, model.predict(X), color='red', label='Regresión Lineal')
+    plt.title('Regresión Lineal Simple Ejercicio 03')
+    plt.xlabel('Seguidores')
+    plt.ylabel('Interacciones')
+    plt.legend()
+    plt.show()
+    #valores de coeficientes
+    print(f'Intercepto: {model.intercept_}')
+    print(f'Pendiente: {model.coef_[0]}')
+
+    # REGRESION LINEAL MULTIPLE
+    # Importar las librerías necesarias
+    import numpy as np
+    import pandas as pd
+    from sklearn.linear_model import LinearRegression
+    # Datos de ejemplo: tamaño (pies cuadrados), número de habitaciones y precio (en miles)
+    X = np.array([[1500, 3], [1800, 4], [2400, 3], [3000, 5], [3500, 4]]) # Tamaño y habitaciones
+    y = np.array([300, 400, 500, 600, 700]) # Precio en miles
+    # Crear el modelo de regresión lineal múltiple
+    model = LinearRegression()
+    model.fit(X, y)
+    # Hacer predicciones
+    y_pred = model.predict([[5000,9]])
+    # Mostrar los resultados
+    print("Predicciones de precios:", y_pred)
+    print("Coeficientes:", model.coef_)
+    print("Intercepto:", model.intercept_)
+
+    #visualizacion de regresion lineal
+
+    Predicciones de precios: [1000.6441834]
+
+Ejercicio 1: Usa datos que relacionan el precio de automóviles con el
+número de cilindros, el tamaño del motor y la marca del automóvil. Crea
+un modelo de regresión lineal múltiple para predecir el precio de un
+automóvil.
+
+    #importamos librerias
+    import numpy as np
+    import pandas as pd
+    from sklearn.linear_model import LinearRegression
+    from sklearn.model_selection import train_test_split
+    #generamos datos aleatorios para los automoviles
+    np.random.seed(0)
+    n_samples = 100
+    #creamos los datos aleatorios segun ejercicio
+    cilindros = np.random.randint(4, 12, n_samples)
+    tamaño_motor = np.random.randint(1000, 5000, n_samples)
+    precio = np.random.uniform(20000, 100000, n_samples)
+    #creamos la dataframe
+    data = pd.DataFrame({'cilindros': cilindros,
+                         'tamaño_motor': tamaño_motor,
+                         'precio': precio})
+    #mostramos los primeros elementos de la dataframe
+    print(data.head())
+    #creamos la matriz de caracteristicas (X) y variable objetivo(y)
+    X = data[['cilindros', 'tamaño_motor']]
+    y = data['precio']
+    #dividir los datos para entrenamiento y prueba
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    #modelo de regresion lineal multiple
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    #realizar predicciones del precio de un automovil
+    y_pred = model.predict(X_test)
+    #mostrar los resultados de la prediccion de precios y valores reales de los precios
+    print("Predicciones de precios:", y_pred)
+    print("Valores reales de los precios:", y_test.values)
+    #mostrar los resultados
+    print("Coeficientes:", model.coef_)
+    print("Intercepto:", model.intercept_)
+
+       cilindros  tamaño_motor        precio
+    0          8          3681  65569.472474
+    1         11          1084  76298.982343
+    2          9          3251  43078.114964
+    3          4          1324  54663.044959
+    4          7          1774  80488.535509
+    Predicciones de precios: [60315.18745145 61783.86924658 58367.07454909 57034.59199308
+     56865.70982934 70340.13489294 49701.16606886 59803.75686218
+     54648.83532124 60322.21707298 64638.82985079 66807.35118263
+     68478.74529169 61993.39152247 51573.9056067  57787.32468069
+     55909.58138522 60651.36523418 56969.44580342 61656.96961632]
+    Valores reales de los precios: [99391.71191109 33347.80104388 59163.91495129 55834.09374966
+     62961.80171006 37701.0148147  38442.64188051 60002.10381834
+     55935.81905747 65569.47247386 97233.29764159 79933.58697222
+     33678.92789465 27389.91115687 36991.23991122 80488.5355092
+     95529.58007341 68660.22926832 29296.15276899 90276.17522208]
+    Coeficientes: [-1793.97342427     2.26998732]
+    Intercepto: 66318.18114738524
+
+Ejercicio 2: Dada la relación entre el rendimiento de los estudiantes
+(calificaciones) y el número de horas de estudio, el número de tareas
+completadas y la asistencia a clases, construye un modelo de regresión
+lineal múltiple para predecir las calificaciones.
+
+    #importamos librerias
+    import numpy as np
+    import pandas as pd
+    from sklearn.linear_model import LinearRegression
+    from sklearn.model_selection import train_test_split
+
+    #generamos datos aleatorios para los automoviles
+    np.random.seed(0)
+    n_samples = 100
+
+    #creamos loa datos aleatorios
+    calificaciones = np.random.uniform(10,20, n_samples)
+    horas_estudio = np.random.randint(1, 10, n_samples)
+    tareas_completadas = np.random.randint(1, 10, n_samples)
+    asistencia_clases = np.random.randint(1, 10, n_samples)
+    #creamos la dataframe
+    data = pd.DataFrame({'calificaciones': calificaciones,
+                         'horas_estudio': horas_estudio,
+                         'tareas_completadas': tareas_completadas,
+                         'asistencia_clases': asistencia_clases})
+
+    #mostramos los primeros elementos del dataframe
+    print(data.head())
+
+    #creamos la matriz de caracteristicas (X) y variable objetivo(y)
+    X = data[['horas_estudio', 'tareas_completadas', 'asistencia_clases']]
+    y = data['calificaciones']
+
+    #dividir los datos de entrenammento y prueba
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    #modelo de regresion lineal multiple
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+
+    #realizar predicciones de calificaciones
+    y_pred = model.predict(X_test)
+
+    #mostrar los resultados de la prediccion de la calificaciones
+    print("Predicciones de calificaciones:", y_pred)
+    print("Valores reales de las calificaciones:", y_test.values)
+
+    #mostrar los resultados
+    print("Coeficientes:", model.coef_)
+    print("Intercepto:", model.intercept_)
+
+       calificaciones  horas_estudio  tareas_completadas  asistencia_clases
+    0       15.488135              3                   2                  8
+    1       17.151894              4                   3                  9
+    2       16.027634              3                   2                  5
+    3       15.448832              1                   5                  5
+    4       14.236548              9                   3                  2
+    Predicciones de calificaciones: [14.39852814 14.41994275 14.11614113 14.83124703 14.32239253 14.06304826
+     14.51451072 15.18248824 14.55912367 14.95466662 14.05174169 14.18766637
+     14.9603199  14.86857858 13.95271896 14.05294021 15.12939536 14.51896548
+     15.18814152 13.94989232]
+    Valores reales de las calificaciones: [16.92472119 11.02044811 19.76459465 16.7063787  16.66766715 16.81820299
+     14.61479362 13.17983179 17.91725038 15.48813504 17.78156751 12.64555612
+     16.0484552  15.68433949 13.18568952 14.23654799 12.82806963 11.20196561
+     15.68044561 17.74233689]
+    Coeficientes: [-0.15048749 -0.01576133 -0.00282664]
+    Intercepto: 15.460264878508783
+
+Ejercicio 3: Modela el precio de las casas utilizando el tamaño en
+metros cuadrados, el número de baños y la antigüedad de la casa. Predice
+el precio de una casa con 120 metros cuadrados, 2 baños y 10 años de
+antigüedad.
+
+    #importar librerias
+    import numpy as np
+    import pandas as pd
+    from sklearn.linear_model import LinearRegression
+    from sklearn.model_selection import train_test_split
+
+    #generamos los datos aleatorios
+    np.random.seed(0)
+    n_samples = 100
+
+    #creamos los datos
+    tamaño_metros = np.random.randint(20, 50, n_samples)
+    num_baños = np.random.randint(1, 5, n_samples)
+    antiguedad = np.random.randint(1, 20, n_samples)
+    precio = np.random.uniform(100000, 500000, n_samples)
+
+    #creamos la dataframe
+    data = pd.DataFrame({'tamaño_metros': tamaño_metros,
+                         'nro_baños': num_baños,
+                         'antiguedad': antiguedad,
+                         'precio': precio})
+
+    #mostramos los primeros elem de la dataframe
+    print(data.head())
+
+    #creamos la matriz de caracteristicas (X) y variable objetivo(y)
+    X = data[['tamaño_metros', 'nro_baños', 'antiguedad']]
+    y = data['precio']
+
+    #dividir los datos para entrenamiento y prueba
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    #modelo de regresion lineal
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+
+    #realizar predicciones de precios
+    y_pred = model.predict(X_test)
+
+    #mostrar los resultados de la prediccion del precio de una casa
+    print("Predicciones de precios:", y_pred)
+    print("Valores reales de los precios:", y_test.values)
+
+    #mostrar los resultados
+    print("Coeficientes:", model.coef_)
+    print("Intercepto:", model.intercept_)
+
+       tamaño_metros  nro_baños  antiguedad         precio
+    0             32          3          12  485795.907116
+    1             35          1          14  321696.974034
+    2             41          4          17  184956.199556
+    3             20          4           9  188977.289755
+    4             23          1           9  187499.749495
+    Predicciones de precios: [304424.66265872 308399.08326724 317727.0379095  338490.81484778
+     332647.98550285 301082.66410183 328355.70445795 315158.18307892
+     340917.50496423 307344.90893378 313681.77545048 291896.8741737
+     308047.69182275 311427.48223517 290277.82081798 311075.60977753
+     347852.30049815 336412.69836786 323181.16496757 322161.00265537]
+    Valores reales de los precios: [342590.18402743 369938.93837148 183662.81179234 384633.52682433
+     288700.62835712 415495.77101281 287798.87323647 304957.38531836
+     122567.33308559 485795.90711577 291438.5302475  229873.18882659
+     125215.31586775 224744.08827288 383419.260008   187499.74949471
+     433215.23900376 493731.77373925 452401.82488067 307884.47746331]
+    Coeficientes: [ 1020.64332535 -3132.77182653 -2216.98237294]
+    Intercepto: 310686.4264775146
+
+EJERCICIO: Prediccion del numero de vistas de videos de German Garmendia
+CONTEXTO: Eres un analista de datos que trabaja con el canal de Youtube
+de German. Quieres predecir del numero de vistas que podria tener un
+nuevo video en funcion de diversas caracteristicas, como la duracion del
+video, numero de "me gusta," el numero de comentarios y el numero de
+suscriptores en ese momento.
+
+Datos requeridos:
+
+1.  Duracion del video (en minutos): Duracion media de los medios en el
+    canal.
+2.  Numero de "me gusta": Promedio de "me gusta" por video.
+3.  Numero de comentarios: Promedio de comentarios por video.
+4.  Numero de suscriptores: Numero de suscriptores en el canal al
+    momento del lanzamiento del video
+
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.linear_model import LinearRegression
+    from sklearn.model_selection import train
+
+    #generamos los datos aleatorios
+    np.random.seed(0)
+    n_samples = 100
+
+    #creamos los datos
+    duracion_video = np.random.randint(10, 100, n_samples)
+    num_me_gusta = np.random.randint(10, 100, n_samples)
+    num_comentarios = np.random.randint(10, 100, n_samples)
+    num_suscriptores = np.random.randint(10, 100, n_samples)
+    num_vistas = np.random.uniform(100000, 500000, n_samples)
+
+    #creamos los dataframe
+    data = pd.dataFrame({'duracion_video': duracion_video,
+                         'num_me_gusta': num_me_gusta,
+                         'num_comentarios': num_comentarios,
+                         'num_suscriptores': num_suscriptores,
+                         'num_vistas': num_vistas})
+
+    #mostramos los primeros elementos de la DataFrame
+    print(data.head())
+
+    #creamos la matriz de caracteristicas (X) y variable objetivo (y)
+    X = data[['duracion_video', 'num_me_gusta', 'num_comentarios', 'num_suscriptores']]
+    y = data['num_vistas', 'num_comentarios', 'num_suscriptores']
+
+    #dividir los datos para entrenamiento y prueba
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    #modelo de regresion lineal
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+
+    #realizar predicciones de vistas de suscriptores
+    y_pred = model.predict(X_test)
+
+    #mostrar los resultados de la prediccion del numero de
+    print("Predicciones de numero de vistas:", y_pred)
+    print("Valores reales de numero de vistas:", y_test.values)
+
+    #mostrar los resultados
+    print("Coeficientes:", model.coef_)
+    print("Intercepto:", model.intercept_)
+
+    #
+
+    # Importar las librerías necesarias
+    import numpy as np
+    import pandas as pd
+    import matplotlib.pyplot as plt
+    from sklearn.linear_model import LinearRegression
+    from sklearn.model_selection import train_test_split
+    # Generar datos aleatorios para videos de Germán Garmendia
+    np.random.seed(42)
+    n_videos = 100
+    # Duración del video (en minutos)
+    duraciones = np.random.randint(5, 21, n_videos)
+    # Número de "me gusta"
+    me_gusta = np.random.randint(100, 5001, n_videos)
+    # Número de comentarios
+    comentarios = np.random.randint(10, 501, n_videos)
+    # Número de suscriptores
+    suscriptores = np.random.randint(10000000, 15000000, n_videos)
+    # Generar el número de vistas (en millones), con una relación lineal
+    vistas = (0.5 * duraciones + 0.03 * me_gusta + 0.1 * comentarios +
+     0.0005 * suscriptores + np.random.normal(0, 50, n_videos))
+    # Crear un DataFrame con los datos generados
+    data = pd.DataFrame({
+     'Duracion': duraciones,
+     'Me_Gusta': me_gusta,
+     'Comentarios': comentarios,
+     'Suscriptores': suscriptores,
+     'Vistas': vistas
+    })
+    # Mostrar las primeras filas del DataFrame
+    print(data.head())
+    # Crear matriz de características (X) y variable objetivo (y)
+    X = data[['Duracion', 'Me_Gusta', 'Comentarios', 'Suscriptores']]
+    y = data['Vistas']
+    # Dividir los datos en entrenamiento y prueba
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+    random_state=42)
+    # Crear y entrenar el modelo de regresión lineal
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    # Realizar predicciones
+    y_pred = model.predict(X_test)
+    # Mostrar resultados
+    print("Predicciones de vistas:", y_pred)
+    print("Valores reales de vistas:", y_test.values)
+    # Visualizar los resultados
+    plt.scatter(y_test, y_pred, color='blue')
+    plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], color='red',
+    linestyle='--')
+    plt.xlabel('Vistas reales (millones)')
+    plt.ylabel('Predicciones de vistas (millones)')
+    plt.title('Predicción de Vistas de Videos de Germán')
+    plt.show()
+
+       Duracion  Me_Gusta  Comentarios  Suscriptores       Vistas
+    0        11      4898           90      11579159  6045.496883
+    1         8       261          196      10907317  5451.298263
+    2        17      4397          122      12485367  6349.622873
+    3        19      2081           11      14515488  7308.022341
+    4        15      1095          139      10668234  5367.728919
+    Predicciones de vistas: [5348.00600693 6895.80169976 6422.77571532 7054.95169525 7533.58926349
+     6327.7033874  7073.16325454 6219.79241308 6352.32200289 5942.37866187
+     7563.34530116 5194.72119009 5827.93285499 6224.34402223 7062.54919327
+     5397.88319492 6668.19368594 5947.53223376 7245.50518046 5818.28628465]
+    Valores reales de vistas: [5369.46502135 6995.21984145 6357.17345744 7105.86776409 7535.55418056
+     6362.87683169 7071.06813088 6296.45727549 6344.37831444 6045.49688281
+     7655.29808971 5201.11358744 5818.76874313 6325.83122061 7133.98007677
+     5367.72891934 6666.37706834 5925.57249734 7228.1979094  5917.9908303 ]
+
+[]

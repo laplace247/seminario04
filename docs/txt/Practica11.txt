@@ -1,0 +1,532 @@
+
+
+REDES NEURONALES
+
+ESTA BASADO EN EL CEREBRO HUMANO <-- FUNCIONAMIENTOS Y LOGICA (NEURONA
+ARTIFICIAL)
+
+REDES NEURONALES ARTIFICIALES (RNA)
+
+-   REDES ARTIFICIALES: UNIDADES BASICAS DE ENTRADAS(DATOS), REALIZAN
+    CALCULOS Y GENERAN SALIDAS
+-   CAPAS: LAS NEURONAS ESTAN DIVIDIDAS EN TRES CAPAS (ENTRADA, OCULTA,
+    SALIDA)
+-   PESOS Y SESGOS: DETERMINAN COMO LAS ENTRADAS AFECTAN LAS SALIDAS DE
+    NEURONA
+-   FUNCIONES DE ACTIVACION: INTRODUCEN NO LINEALIDADES AL MODELO,
+    PERMITE QUE SEA MAS POTENTE LA RED NEURONAL
+
+    #realizamos la activacion del tipo sigmoide
+    #definir una red neuronal simple
+    import numpy as np
+    #definir una funcion de activacion
+    def sigmoid(x):
+      return 1/(1+np.exp(-x))
+    #crear una red neuronal con una sola capa y una sola neurona
+    def simple_neuronal(inputs, weights):
+      #producto de entrada y pesos
+      z = np.dot(inputs, weights)
+      output = sigmoid(z)
+      return output
+    #generar las entradas y pesos iniciales
+    inputs = np.array([0.8, 0.2]) #2 entradas
+    weights = np.array([0.6, 0.9]) #pesos asociados a las entradas
+    #calcular la salida de la red neuronal
+    output = simple_neuronal(inputs, weights)
+    print(f"La salida de la red neuronal es: {output}")
+
+    La salida de la red neuronal es: 0.6592603884513855
+
+ESTRUCTURA DE UNA RED NEURONAL
+
+-   CAPA DE ENTRADA: RECIBE LOS DATOS
+-   CAPA OCULTA: PROCESA LOS DATOS DE ENTRADA
+
+CARACTERISTICAS MAS ABSTRACTAS
+
+-   CAPA DE SALIDA: PROPORCIONA EL RESULTADO FINAL
+
+    #IMAGINA UNA EMPRESA QUE CLASIFICA FRUTAS
+    #LAS ENTRADAS PODRIAN SER LAS CARACTERISTICAS (PESO Y COLOR)
+    #LAS CAPAS OCULTAS PROCESAN ESTOS DATOS (CARACTERISTICAS)
+    #LA CAPA DE SALIDA INDICA SI LA FRUTA ES (MANZANA O PLATANO)
+
+    #CREAR UNA RED NEURONAL CON TENSOR Y KERAS
+    import tensorflow as tf
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Dense
+
+    #CREAR UN MODELO SECUENCIAL
+    model = Sequential([
+        Dense(units=4, activation='relu', input_shape=(2,)), #CAPA OCULTA DE 4 NEURONAS
+        Dense(units=3, activation='softmax') #CAPA DE SALIDA CON 3 CLASES
+    ])
+    #COMPILAR EL MODELO
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    #MOSTRAR EL RESUMEN DEL MODELO
+    model.summary()
+
+    /usr/local/lib/python3.10/dist-packages/keras/src/layers/core/dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+    Model: "sequential"
+
+    ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┓
+    ┃ Layer (type)                         ┃ Output Shape                ┃         Param # ┃
+    ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━┩
+    │ dense (Dense)                        │ (None, 4)                   │              12 │
+    ├──────────────────────────────────────┼─────────────────────────────┼─────────────────┤
+    │ dense_1 (Dense)                      │ (None, 3)                   │              15 │
+    └──────────────────────────────────────┴─────────────────────────────┴─────────────────┘
+
+     Total params: 27 (108.00 B)
+
+     Trainable params: 27 (108.00 B)
+
+     Non-trainable params: 0 (0.00 B)
+
+    #construir una red neuronal para predecir el precio de una casa
+    #tomando como datos iniciales el tamaño, habitaciones y ubicacion
+    import pandas as pd # manejar estruc de datos
+    import numpy as np # op numericas
+    from sklearn.model_selection import train_test_split # separa los datos en entrenamiento y prueba
+    from sklearn.preprocessing import StandardScaler # escala (estandarizar) las caracte. de los datos
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Dense
+    # models y layers --> contruir la arquitectura de una red neuronal
+
+    #generar datos simulados
+    np.random.seed(42)
+    n_samples = 600 # muestras: 600 casas
+    X = np.random.rand(n_samples, 3) * [200,5,1] # genera una matriz de (600,3)
+    #va utilizar las 600 casas con las variaciones de
+    # 0 a 200 mts de tamaño
+    # 0 a 5 habitaciones
+    # 0 a 1 ubicacion ---> tiene o no tiene
+    y = X[:,0] * 300 + X[:,1] * 5000 + X[:,2] * 10000 + np.random.randn(n_samples) * 5000
+
+    #dividir los datos de entrenamiento y prueba
+    X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.2,random_state=42) #tamaño de prueba:20% de 600->120
+    #escalar los datos
+    scaler = StandardScaler() #estandariza las caracte. eliminando la media y escalando la varianza unitaria
+    X_train = scaler.fit_transform(X_train) #calcula la media y desviacion standar de X_train -->  X_test
+    X_test = scaler.transform(X_test)
+
+    #creacion del modelo de red neuronal
+    model = Sequential([
+        Dense(units=64, activation='relu', input_shape=(3,)), #capa oculta de 64 neuronas
+        Dense(units=32, activation='relu'), #capa oculta de 32 neuronas
+        Dense(units=1) #capa de salida: precio de casa
+    ])
+    #compilacion y entrenamiento
+    model.compile(optimizer='adam', loss='mse')
+    model.fit(X_train, y_train, epochs=50, validation_data=(X_test,y_test))
+
+    #evaluacion del modelo
+    loss = model.evaluate(X_test,y_test)
+    print(f"perdida en el conjunto de prueba: {loss}")
+
+    Epoch 1/50
+
+    /usr/local/lib/python3.10/dist-packages/keras/src/layers/core/dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 2s 16ms/step - loss: 2595858176.0000 - val_loss: 2834189568.0000
+    Epoch 2/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2599650048.0000 - val_loss: 2834120192.0000
+    Epoch 3/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2556896768.0000 - val_loss: 2834015232.0000
+    Epoch 4/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2610828544.0000 - val_loss: 2833863680.0000
+    Epoch 5/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2759710464.0000 - val_loss: 2833654016.0000
+    Epoch 6/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2586152704.0000 - val_loss: 2833375232.0000
+    Epoch 7/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2722685952.0000 - val_loss: 2832997376.0000
+    Epoch 8/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2630793984.0000 - val_loss: 2832501760.0000
+    Epoch 9/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2629486848.0000 - val_loss: 2831859712.0000
+    Epoch 10/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 2537207808.0000 - val_loss: 2831056896.0000
+    Epoch 11/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2668809728.0000 - val_loss: 2830052608.0000
+    Epoch 12/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2531746816.0000 - val_loss: 2828842496.0000
+    Epoch 13/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2590578176.0000 - val_loss: 2827379968.0000
+    Epoch 14/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2635638272.0000 - val_loss: 2825643008.0000
+    Epoch 15/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2630235136.0000 - val_loss: 2823609856.0000
+    Epoch 16/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2662251264.0000 - val_loss: 2821264384.0000
+    Epoch 17/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2679471616.0000 - val_loss: 2818565120.0000
+    Epoch 18/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2644785664.0000 - val_loss: 2815542528.0000
+    Epoch 19/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 2500708608.0000 - val_loss: 2812083712.0000
+    Epoch 20/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2631067648.0000 - val_loss: 2808221440.0000
+    Epoch 21/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2601114368.0000 - val_loss: 2803942400.0000
+    Epoch 22/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2641412864.0000 - val_loss: 2799133696.0000
+    Epoch 23/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2538855936.0000 - val_loss: 2793966336.0000
+    Epoch 24/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2472072960.0000 - val_loss: 2788206848.0000
+    Epoch 25/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2656178432.0000 - val_loss: 2781851392.0000
+    Epoch 26/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2615286272.0000 - val_loss: 2775000320.0000
+    Epoch 27/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 2437248512.0000 - val_loss: 2767721728.0000
+    Epoch 28/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 2529784320.0000 - val_loss: 2759586048.0000
+    Epoch 29/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2442870784.0000 - val_loss: 2751110656.0000
+    Epoch 30/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - loss: 2555200000.0000 - val_loss: 2741867776.0000
+    Epoch 31/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2429723904.0000 - val_loss: 2732121600.0000
+    Epoch 32/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2470529280.0000 - val_loss: 2721618688.0000
+    Epoch 33/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2481721088.0000 - val_loss: 2710381824.0000
+    Epoch 34/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2553855744.0000 - val_loss: 2698577408.0000
+    Epoch 35/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2462274048.0000 - val_loss: 2686095616.0000
+    Epoch 36/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2553507840.0000 - val_loss: 2672758016.0000
+    Epoch 37/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2412822272.0000 - val_loss: 2659214336.0000
+    Epoch 38/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2407218432.0000 - val_loss: 2644615168.0000
+    Epoch 39/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2496019200.0000 - val_loss: 2629314816.0000
+    Epoch 40/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2434275584.0000 - val_loss: 2613218304.0000
+    Epoch 41/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2349423104.0000 - val_loss: 2596829952.0000
+    Epoch 42/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2433764864.0000 - val_loss: 2579323392.0000
+    Epoch 43/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - loss: 2406623488.0000 - val_loss: 2561011456.0000
+    Epoch 44/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2477706496.0000 - val_loss: 2542018048.0000
+    Epoch 45/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2380960000.0000 - val_loss: 2522576128.0000
+    Epoch 46/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2290333184.0000 - val_loss: 2502536192.0000
+    Epoch 47/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2301464320.0000 - val_loss: 2481364224.0000
+    Epoch 48/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2336897280.0000 - val_loss: 2459410432.0000
+    Epoch 49/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2191159296.0000 - val_loss: 2437430528.0000
+    Epoch 50/50
+    15/15 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - loss: 2253829632.0000 - val_loss: 2413817856.0000
+    4/4 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - loss: 2294298880.0000 
+    perdida en el conjunto de prueba: 2413817856.0
+
+    #PRACTICA 01
+    import pandas as pd
+    import numpy as np
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import LabelEncoder, StandardScaler
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Dense
+    # Generar datos aleatorios
+    np.random.seed(42)
+    n_samples = 1000
+    # Generar fechas aleatorias en 2024
+    dates = pd.date_range(start="2024-01-01", end="2024-12-31", periods=n_samples)
+    # Generar temperaturas aleatorias (entre -10°C y 40°C)
+    temperatures = np.random.uniform(-10, 40, n_samples)
+    # Generar estados del clima en función de la temperatura
+    # Soleado: temp > 25, Nublado: 10 <= temp <= 25, Lluvioso: temp < 10
+    conditions = np.where(temperatures > 25, "soleado",
+        np.where(temperatures >=10, "nublado", "lluvioso"))
+    #Generar su porcentaje de humedad
+    stats = np.random.randint(0,100,n_samples)
+    # Crear el DataFrame
+    data = pd.DataFrame({
+      "fecha": dates,
+      "temperatura": temperatures,
+      "clima": conditions,
+      "humedad": stats
+    })
+    # Convertir la columna 'fecha' en valores numéricos (para simplificar el modelo)
+    data['dia'] = data['fecha'].dt.dayofyear # Día del año (1 a 365)
+    data.drop(columns="fecha", inplace=True) # Eliminar la columna original de fechas
+    # Mostrar los primeros datos
+    print(data.head())
+    # Codificar el clima (soleado=0, nublado=1, lluvioso=2)
+    encoder = LabelEncoder()
+    data['clima_encoded'] = encoder.fit_transform(data['clima'])
+    # Variables de entrada (día y temperatura) y salida (clima codificado)
+    X = data[['dia', 'temperatura']].values
+    y = data['clima_encoded'].values
+    # Dividir en conjunto de entrenamiento y prueba
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+    random_state=42)
+    # Escalar los datos de entrada
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+    # Crear el modelo
+    model = Sequential([
+      Dense(64, activation='relu', input_shape=(2,)), # Entrada: día y temperatura
+      Dense(32, activation='relu'),
+      Dense(3, activation='softmax') # Salida: 3 clases (soleado, nublado, lluvioso)
+    ])
+    # Compilar el modelo
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy',
+    metrics=['accuracy'])
+    # Entrenar el modelo
+    model.fit(X_train, y_train, epochs=30, validation_data=(X_test, y_test))
+    # Evaluar el modelo
+    loss, accuracy = model.evaluate(X_test, y_test)
+    print(f"Pérdida: {loss:.2f}, Precisión: {accuracy:.2%}")
+    # Realizar predicciones
+    new_data = np.array([[120, 15], # Día 120 del año, temperatura 15°C
+      [200, 30], # Día 200, temperatura 30°C
+      [300, -5]]) # Día 300, temperatura -5°C
+    new_data_scaled = scaler.transform(new_data)
+    predictions = model.predict(new_data_scaled)
+    # Convertir predicciones a etiquetas
+    predicted_classes = np.argmax(predictions, axis=1)
+    predicted_labels = encoder.inverse_transform(predicted_classes)
+    # Mostrar resultados
+    for i, pred in enumerate(predicted_labels):
+      print(f"Entrada: {new_data[i]} => Clima predicho: {pred}")
+
+       temperatura     clima  humedad  dia
+    0     8.727006  lluvioso       46    1
+    1    37.535715   soleado       11    1
+    2    26.599697   soleado       61    1
+    3    19.932924   nublado       79    2
+    4    -2.199068  lluvioso       87    2
+    Epoch 1/30
+
+    /usr/local/lib/python3.10/dist-packages/keras/src/layers/core/dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 1s 11ms/step - accuracy: 0.6440 - loss: 0.9691 - val_accuracy: 0.6950 - val_loss: 0.8247
+    Epoch 2/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.7121 - loss: 0.7703 - val_accuracy: 0.7850 - val_loss: 0.6271
+    Epoch 3/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.7857 - loss: 0.5762 - val_accuracy: 0.8200 - val_loss: 0.4754
+    Epoch 4/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8428 - loss: 0.4379 - val_accuracy: 0.8850 - val_loss: 0.3733
+    Epoch 5/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8932 - loss: 0.3541 - val_accuracy: 0.9100 - val_loss: 0.2989
+    Epoch 6/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.9040 - loss: 0.2838 - val_accuracy: 0.9200 - val_loss: 0.2469
+    Epoch 7/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9262 - loss: 0.2194 - val_accuracy: 0.9350 - val_loss: 0.2107
+    Epoch 8/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9391 - loss: 0.1941 - val_accuracy: 0.9300 - val_loss: 0.1809
+    Epoch 9/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9404 - loss: 0.1678 - val_accuracy: 0.9450 - val_loss: 0.1642
+    Epoch 10/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9529 - loss: 0.1502 - val_accuracy: 0.9550 - val_loss: 0.1376
+    Epoch 11/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9619 - loss: 0.1346 - val_accuracy: 0.9500 - val_loss: 0.1244
+    Epoch 12/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.9666 - loss: 0.1234 - val_accuracy: 0.9550 - val_loss: 0.1085
+    Epoch 13/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9836 - loss: 0.0985 - val_accuracy: 0.9700 - val_loss: 0.0978
+    Epoch 14/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.9788 - loss: 0.0956 - val_accuracy: 0.9800 - val_loss: 0.0877
+    Epoch 15/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9748 - loss: 0.0861 - val_accuracy: 0.9700 - val_loss: 0.0845
+    Epoch 16/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - accuracy: 0.9819 - loss: 0.0842 - val_accuracy: 0.9800 - val_loss: 0.0748
+    Epoch 17/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.9899 - loss: 0.0684 - val_accuracy: 0.9800 - val_loss: 0.0701
+    Epoch 18/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.9903 - loss: 0.0645 - val_accuracy: 0.9850 - val_loss: 0.0661
+    Epoch 19/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - accuracy: 0.9807 - loss: 0.0829 - val_accuracy: 0.9850 - val_loss: 0.0637
+    Epoch 20/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.9873 - loss: 0.0653 - val_accuracy: 0.9850 - val_loss: 0.0601
+    Epoch 21/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9883 - loss: 0.0580 - val_accuracy: 0.9900 - val_loss: 0.0538
+    Epoch 22/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9865 - loss: 0.0658 - val_accuracy: 0.9850 - val_loss: 0.0533
+    Epoch 23/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9917 - loss: 0.0573 - val_accuracy: 0.9950 - val_loss: 0.0508
+    Epoch 24/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9958 - loss: 0.0496 - val_accuracy: 0.9950 - val_loss: 0.0466
+    Epoch 25/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9849 - loss: 0.0538 - val_accuracy: 0.9800 - val_loss: 0.0535
+    Epoch 26/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 7ms/step - accuracy: 0.9903 - loss: 0.0561 - val_accuracy: 0.9900 - val_loss: 0.0434
+    Epoch 27/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 6ms/step - accuracy: 0.9941 - loss: 0.0495 - val_accuracy: 0.9900 - val_loss: 0.0449
+    Epoch 28/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - accuracy: 0.9922 - loss: 0.0451 - val_accuracy: 0.9950 - val_loss: 0.0429
+    Epoch 29/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - accuracy: 0.9903 - loss: 0.0520 - val_accuracy: 0.9950 - val_loss: 0.0400
+    Epoch 30/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 9ms/step - accuracy: 0.9970 - loss: 0.0441 - val_accuracy: 0.9850 - val_loss: 0.0408
+    7/7 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - accuracy: 0.9905 - loss: 0.0320 
+    Pérdida: 0.04, Precisión: 98.50%
+    1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 101ms/step
+    Entrada: [120  15] => Clima predicho: nublado
+    Entrada: [200  30] => Clima predicho: soleado
+    Entrada: [300  -5] => Clima predicho: lluvioso
+
+    #PRACTICA 02
+    import pandas as pd
+    import numpy as np
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import LabelEncoder, StandardScaler
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.layers import Dense
+    # Generar datos aleatorios
+    np.random.seed(42)
+    n_samples = 1000
+    # Generar horas aleatorias (de 0 a 23) y días de la semana (0 a 6)
+    hours = np.random.randint(0, 24, n_samples)
+    days = np.random.randint(0, 7, n_samples) # 0=Lunes, 6=Domingo
+    # Generar niveles de tráfico
+    # Alto: hora punta (7-9, 17-19) en días laborales (0-4)
+    # Moderado: horas intermedias o fines de semana
+    # Bajo: madrugada (0-6 horas)
+    conditions = np.where(((hours >= 7) & (hours <= 9) | (hours >= 17) & (hours <= 19)) &
+    (days < 5), "alto",
+     np.where((hours >= 10) & (hours <= 16) | (days >= 5), "moderado", "bajo"))
+    # Crear el DataFrame
+    data = pd.DataFrame({
+     "hora": hours,
+     "dia_semana": days,
+     "trafico": conditions
+    })
+    # Mostrar las primeras filas del DataFrame
+    print(data.head())
+
+    # Codificar el nivel de tráfico (bajo=0, moderado=1, alto=2)
+    encoder = LabelEncoder()
+    data['trafico_encoded'] = encoder.fit_transform(data['trafico'])
+    # Variables de entrada (hora y día de la semana) y salida (tráfico codificado)
+    X = data[['hora', 'dia_semana']].values
+    y = data['trafico_encoded'].values
+    # Dividir en conjunto de entrenamiento y prueba
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+    random_state=42)
+    # Escalar los datos de entrada
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(X_train)
+    X_test = scaler.transform(X_test)
+
+    # Crear el modelo
+    model = Sequential([
+     Dense(32, activation='relu', input_shape=(2,)), # Entrada: hora y día de la semana
+     Dense(16, activation='relu'),
+     Dense(3, activation='softmax') # Salida: 3 clases (bajo, moderado, alto)
+    ])
+    # Compilar el modelo
+    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy',
+    metrics=['accuracy'])
+    # Entrenar el modelo
+    model.fit(X_train, y_train, epochs=30, validation_data=(X_test, y_test))
+
+    # Evaluar el modelo
+    loss, accuracy = model.evaluate(X_test, y_test)
+    print(f"Pérdida: {loss:.2f}, Precisión: {accuracy:.2%}")
+
+    # Realizar predicciones
+    new_data = np.array([[8, 2], # Hora 8:00, Martes
+     [15, 6], # Hora 15:00, Domingo
+     [23, 0]]) # Hora 23:00, Lunes
+    new_data_scaled = scaler.transform(new_data)
+    predictions = model.predict(new_data_scaled)
+    # Convertir predicciones a etiquetas
+    predicted_classes = np.argmax(predictions, axis=1)
+    predicted_labels = encoder.inverse_transform(predicted_classes)
+    # Mostrar resultados
+    for i, pred in enumerate(predicted_labels):
+     print(f"Entrada: Hora={new_data[i, 0]}, Día={new_data[i, 1]} => Tráfico predicho: {pred}")
+
+       hora  dia_semana   trafico
+    0     6           6  moderado
+    1    19           0      alto
+    2    14           1  moderado
+    3    10           5  moderado
+    4     7           5  moderado
+    Epoch 1/30
+
+    /usr/local/lib/python3.10/dist-packages/keras/src/layers/core/dense.py:87: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+      super().__init__(activity_regularizer=activity_regularizer, **kwargs)
+
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 1s 10ms/step - accuracy: 0.3676 - loss: 1.1363 - val_accuracy: 0.6850 - val_loss: 1.0027
+    Epoch 2/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.6669 - loss: 0.9807 - val_accuracy: 0.7400 - val_loss: 0.8733
+    Epoch 3/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.7143 - loss: 0.8806 - val_accuracy: 0.7250 - val_loss: 0.7854
+    Epoch 4/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.7043 - loss: 0.7824 - val_accuracy: 0.7500 - val_loss: 0.7186
+    Epoch 5/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.6975 - loss: 0.7580 - val_accuracy: 0.7850 - val_loss: 0.6706
+    Epoch 6/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.7404 - loss: 0.6760 - val_accuracy: 0.7750 - val_loss: 0.6301
+    Epoch 7/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.7648 - loss: 0.6110 - val_accuracy: 0.8000 - val_loss: 0.5948
+    Epoch 8/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8073 - loss: 0.5832 - val_accuracy: 0.8050 - val_loss: 0.5627
+    Epoch 9/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.7921 - loss: 0.5715 - val_accuracy: 0.8100 - val_loss: 0.5363
+    Epoch 10/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.7920 - loss: 0.5581 - val_accuracy: 0.8100 - val_loss: 0.5114
+    Epoch 11/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.7749 - loss: 0.5407 - val_accuracy: 0.8100 - val_loss: 0.4879
+    Epoch 12/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8128 - loss: 0.4934 - val_accuracy: 0.8100 - val_loss: 0.4672
+    Epoch 13/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - accuracy: 0.7890 - loss: 0.4916 - val_accuracy: 0.8100 - val_loss: 0.4470
+    Epoch 14/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8139 - loss: 0.4613 - val_accuracy: 0.8150 - val_loss: 0.4300
+    Epoch 15/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8099 - loss: 0.4518 - val_accuracy: 0.8200 - val_loss: 0.4131
+    Epoch 16/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8488 - loss: 0.4044 - val_accuracy: 0.8450 - val_loss: 0.3974
+    Epoch 17/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8291 - loss: 0.4300 - val_accuracy: 0.8450 - val_loss: 0.3840
+    Epoch 18/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8250 - loss: 0.4152 - val_accuracy: 0.8500 - val_loss: 0.3680
+    Epoch 19/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8612 - loss: 0.3627 - val_accuracy: 0.8500 - val_loss: 0.3547
+    Epoch 20/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8543 - loss: 0.3634 - val_accuracy: 0.8600 - val_loss: 0.3419
+    Epoch 21/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8666 - loss: 0.3582 - val_accuracy: 0.8600 - val_loss: 0.3299
+    Epoch 22/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8534 - loss: 0.3600 - val_accuracy: 0.8750 - val_loss: 0.3208
+    Epoch 23/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8668 - loss: 0.3455 - val_accuracy: 0.8750 - val_loss: 0.3085
+    Epoch 24/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8962 - loss: 0.3033 - val_accuracy: 0.8750 - val_loss: 0.2987
+    Epoch 25/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.8993 - loss: 0.2786 - val_accuracy: 0.8750 - val_loss: 0.2885
+    Epoch 26/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8854 - loss: 0.2939 - val_accuracy: 0.8850 - val_loss: 0.2795
+    Epoch 27/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - accuracy: 0.8881 - loss: 0.2885 - val_accuracy: 0.8950 - val_loss: 0.2677
+    Epoch 28/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.8910 - loss: 0.2815 - val_accuracy: 0.8950 - val_loss: 0.2600
+    Epoch 29/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 5ms/step - accuracy: 0.8856 - loss: 0.2745 - val_accuracy: 0.9200 - val_loss: 0.2531
+    Epoch 30/30
+    25/25 ━━━━━━━━━━━━━━━━━━━━ 0s 4ms/step - accuracy: 0.9202 - loss: 0.2553 - val_accuracy: 0.9200 - val_loss: 0.2418
+    7/7 ━━━━━━━━━━━━━━━━━━━━ 0s 3ms/step - accuracy: 0.9147 - loss: 0.2577 
+    Pérdida: 0.24, Precisión: 92.00%
+    1/1 ━━━━━━━━━━━━━━━━━━━━ 0s 64ms/step
+    Entrada: Hora=8, Día=2 => Tráfico predicho: alto
+    Entrada: Hora=15, Día=6 => Tráfico predicho: moderado
+    Entrada: Hora=23, Día=0 => Tráfico predicho: bajo

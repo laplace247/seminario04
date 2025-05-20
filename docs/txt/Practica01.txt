@@ -1,0 +1,183 @@
+Ejercicio 01: Introduccion a Numpy: Biblioteca fundam. para la manipulacion de arrays y op. matem. en Python
+
+
+import numpy as np
+#crear un array numpy
+array=np.array([1,2,3,4,5])
+#realizar operaciones basicas
+suma=np.sum(array)
+media=np.mean(array)
+print ("La suma es:",suma)
+print ("La media es:",media)
+---------------------------------------------------
+La suma es: 15
+La media es: 3.0
+
+
+Ejercicio: Cargar y visualizar un conjunto de datos con pandas y matplotlib
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Cargar un conjunto de datos 'iris'
+iris = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data', header=None, names=['sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'class'])
+
+# Mostrar las primeras filas del dataset
+print(iris.head())
+
+# Visualizar la distribución de las longitudes de los pétalos
+plt.hist(iris['petal_length'], bins=20, color='blue', edgecolor='black')
+plt.title('Distribución de la Longitud de los Pétalos')
+plt.xlabel('Longitud del Pétalo')
+plt.ylabel('Frecuencia')
+
+# Ajustar el diseño y mostrar el gráfico
+plt.tight_layout()
+plt.show()
+-------------------------------------------
+   sepal_length  sepal_width  petal_length  petal_width        class
+0           5.1          3.5           1.4          0.2  Iris-setosa
+1           4.9          3.0           1.4          0.2  Iris-setosa
+2           4.7          3.2           1.3          0.2  Iris-setosa
+3           4.6          3.1           1.5          0.2  Iris-setosa
+4           5.0          3.6           1.4          0.2  Iris-setosa
+
+
+
+import pandas as pd
+  #crear dataframe
+data={
+      'Producto':['Manzana','Zanahoria','Platano','Cebolla','Durazno'],
+      'Categoria':['Fruta','Verdura','Fruta','Verdura','Fruta'],
+      'Precio':[5.5,1.2,2,0.8,12],
+      'Stock':[100,150,80,50,30]
+  }
+df=pd.DataFrame(data)
+print(df)
+#filtrar los productos con precio mayor a 5 soles
+filtro=df[df['Precio']>5]
+print(filtro)
+#filtrar y decirme cuales son las verduras y su stock sea mayor a 100
+filtro2=df[(df['Categoria']=='Verdura')&(df['Stock']>100)]
+print(filtro2)
+------------------------------------------------
+    Producto Categoria  Precio  Stock
+0    Manzana     Fruta     5.5    100
+1  Zanahoria   Verdura     1.2    150
+2    Platano     Fruta     2.0     80
+3    Cebolla   Verdura     0.8     50
+4    Durazno     Fruta    12.0     30
+  Producto Categoria  Precio  Stock
+0  Manzana     Fruta     5.5    100
+4  Durazno     Fruta    12.0     30
+    Producto Categoria  Precio  Stock
+1  Zanahoria   Verdura     1.2    150
+La media es: 30.0
+La mediana es: 30.0
+La desviacion es: 14.142135623730951
+
+
+
+#crearemos ejer donde podamos analizar un array numpy
+#y daremos unas estadisticas
+import numpy as np
+ar = np.array([10,20,30,40,50])
+media=np.mean(ar)
+mediana=np.median(ar)
+desviacion=np.std(ar)
+print("La media es:",media)
+print("La mediana es:",mediana)
+print("La desviacion es:",desviacion)
+--------------------------------------------
+La media es: 30.0
+La mediana es: 30.0
+La desviacion es: 14.142135623730951
+
+
+#combinar y agrupar datos en panda
+import pandas as pd
+df1=pd.DataFrame({
+  'Producto':['Manzana','Platano','Fresa'],
+  'Enero':[30,45,50],
+  'Febrero':[35,50,25]
+})
+df2=pd.DataFrame({
+  'Producto':['Manzana','Platano','Fresa'],
+  'Marzo':[25,55,30],
+  'Abril':[40,60,35]
+})
+#combinamos la dframe
+juntar=pd.merge(df1,df2,on='Producto')
+#print('Dataframe 1: \n',df1)
+#print('Dataframe 2: \n',df2)
+#print('Dataframe Agrupado: \n',juntar)
+#Ejer con axis=1
+#Calcular las ventas totales de los meses enero hasta abril
+juntar['Total']=juntar[['Enero','Febrero','Marzo','Abril']].sum(axis=1)
+print(juntar)
+juntar2=juntar[['Enero','Febrero','Marzo','Abril']].sum(axis=0)
+print(juntar2)
+----------------------------------------------
+Enero      125
+Febrero    110
+Marzo      110
+Abril      135
+dtype: int64
+
+
+#crear una matriz 3*3, realiremos una multip y trasposicion
+import numpy as np
+#crear una matriz 3*3
+a=np.array([[1,2,3],[4,5,6],[7,8,9]])
+b=np.array([[9,8,7],[6,5,4],[3,2,1]])
+#multiplicar matriz
+multi=np.dot(a,b)
+print(multi)
+#transponer la multiplicacion
+transpuesta = np.transpose(multi)
+print(transpuesta)
+------------------------------------------------------
+[[ 30  24  18]
+ [ 84  69  54]
+ [138 114  90]]
+[[ 30  84 138]
+ [ 24  69 114]
+ [ 18  54  90]]
+ 
+ 
+ #manejar datos faltantes con pandas
+import pandas as pd
+import numpy as np
+#crear un dataframe
+df=pd.DataFrame({
+  'Producto':['Zapatillas','Gorro','Polo','Mochila'],
+  'Precio':[250.5,np.nan,10,50],
+  'Stock':[100,150,280,np.nan]
+})
+#rellenar los valores faltantes con la media
+df['Precio'].fillna(df['Precio'].mean(),inplace=True)
+df['Stock'].fillna(df['Stock'].sum(),inplace=True)
+print(df)
+----------------------------------------------------------
+     Producto  Precio  Stock
+0  Zapatillas   250.5  100.0
+1       Gorro   103.5  150.0
+2        Polo    10.0  280.0
+3     Mochila    50.0  530.0
+
+
+#realizamos operaciones logicas
+import numpy as np
+array=np.array([20,35,40,42,14,11,16,62,45,65,47,84,73,100,99,98,22,44,56])
+#muestrame los pares
+par=array[array%2==0]
+print(par)
+impar=array[array%2!=0]
+print(impar)
+---------------------------------------------------------
+[ 20  40  42  14  16  62  84 100  98  22  44  56]
+[35 11 45 65 47 73 99]
+
+
+
