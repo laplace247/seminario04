@@ -1,0 +1,97 @@
+CREA DATA DE UN RESTAURANTE DESDE ENERO 2022 HASTA DICIEMBRE 2024, GENERA TAMBIEN DATAS DE VENTAS SEGUN LOS PLATOS(MAXIMO 1500 PLATOS), SON LOS SIGUIENTES: CHICHARRON DE POLLO, CUY CHACTADO, ARROZ VERDE DE PATO, PICANTE. EVALUAR FECHAS FESTIVAS, EN ESTE CASO SOLO DICIEMBRE Y ENERO EN DONDE LAS VENTAS SE TRIPLICAN ENTREGAR UN DATAFRAME QUE CONTENGA LA PREDICCION DE LAS VENTAS DESDE ENERO 2025 HASTA DICIEMBRE 2025, Y TAMBIEN EL PLATO EN EL QUE SE DEBE INVERTIR POR CADA MES
+
+
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from sklearn.preprocessing import StandardScaler
+ 
+#generar los datos de enero 2022 hasta diciembre 2024
+np.random.seed(42)
+#fechas y platos
+fechas = pd.date_range(start='2022-01-01', end='2024-12-31', freq='D')
+platos = ['chicharron de pollo', 'cuy chachado', 'arroz verde de pato', 'picante']
+#generar datos
+data = []
+for fecha in fechas:
+    for plato in platos:
+        #ventas diarias
+        ventas = np.random.randint(10,50) # ventas diarias base
+        #ventas triplicadas para diciembre y enero
+        if fecha.month in [12,1]:
+          ventas *= 3
+        data.append([fecha,plato,ventas])
+#creamos la dataFrame
+df = pd.DataFrame(data,columns=['Fecha','Plato','Ventas'])
+ 
+#creamos variables de apoyo
+df['Mes'] = df['Fecha'].dt.month
+df['Año'] = df['Fecha'].dt.year
+ 
+#vamos a agrupar el mes y el plato
+ventas_mensuales = df.groupby(['Año','Mes','Plato'])['Ventas'].sum().reset_index()
+ 
+#haremos una prediccion a traves de la data
+X = ventas_mensuales[['Año','Mes']]
+y = ventas_mensuales['Ventas']
+ 
+#Escalar los datos
+scaler_X = StandardScaler()
+X_scaled = scaler_X.fit_transform(X)
+ 
+scaler_y = StandardScaler()
+y_scaled = scaler_y.fit_transform(y.values.reshape(-1,1))
+ 
+#creamos el modelo de una red neuronal
+model = Sequential([
+    Dense(16, input_dim=X_scaled.shape[1],activation='relu'),
+    Dense(8, activation='relu'),
+    Dense(1, activation='linear')
+])
+#compilamos el modelo
+model.compile(optimizer='adam',loss='mean_squared_error')
+ 
+#entrenamos el modelo
+model.fit(X_scaled,y_scaled,epochs=50,batch_size=10,verbose=0)
+ 
+#generamos los datos de prediccion para el 2025
+fechas_2025 = pd.date_range(start='2025-01-01',end='2025-12-31',freq='M')
+prediccion_data = []
+ 
+for fecha in fechas_2025:
+  for plato in platos:
+    prediccion_data.append([fecha.year,fecha.month])
+ 
+prediccion_df = pd.DataFrame(prediccion_data,columns=['Año','Mes'])
+ 
+#escalar los datos para prediccion
+X_pred_scaled = scaler_X.transform(prediccion_df)
+y_pred_scaled = model.predict(X_pred_scaled)
+ 
+#regresar al formato original/desescalar
+prediccion_df['Ventas_pred'] = scaler_y.inverse_transform(y_pred_scaled)
+ 
+#determinar el plato en el que se debe invertir mas
+prediccion_df['Plato'] = np.tile(platos,len(fechas_2025))
+prediccion_agrupada = prediccion_df.groupby(['Año','Mes']).apply(lambda x: x.loc[x['Ventas_pred'].idxmax()]).reset_index(drop=True)
+ 
+#veamos las predicciones
+plt.figure(figsize=(12,6))
+for plato in platos:
+  plato_data = prediccion_df[prediccion_df['Plato']==plato]
+  plt.plot(plato_data['Mes'],plato_data['Ventas_pred'],label=plato)
+plt.title('Prediccion de ventas para el 2025')
+plt.xlabel('Mes')
+plt.ylabel('Ventas')
+plt.legend()
+plt.grid()
+plt.show()
+ 
+#mostramos las predicciones
+print("Predicciones de ventas y plato de mayor inversion por mes para el 2025:")
+print(prediccion_agrupada[['Año','Mes','Plato','Ventas_pred']])
